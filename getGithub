@@ -1,0 +1,19 @@
+#!/bin/bash
+URL=$1
+EXT=$2;
+OPEN=$3;
+NAME=$4;
+
+rm -rf ${NAME}*
+
+wget --no-check-certificate $URL
+
+if [ -f ${NAME} ];
+then
+mv ${NAME} ${NAME}.$EXT
+fi
+
+$OPEN ${NAME}.$EXT
+rm ${NAME}.$EXT
+
+
