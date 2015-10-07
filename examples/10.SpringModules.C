@@ -21,9 +21,12 @@ int main (int argc, char *argv[])
   double dt=strtod(argv[4], NULL); assert(dt>0);
   
   SightInit(argc, argv, "10.SpringModules", txt()<<"dbg.10.SpringModules."<<getenv("SPRING_BUF_SIZE")<<"."<<expNum);
-  modularApp::setNamedMeasures(namedMeasures("time", new timeMeasure(),
-                                             "PAPI", new PAPIMeasure(papiEvents(PAPI_TOT_INS, PAPI_L2_TC_MR))));
-  springModularApp springApp;
+// <<<<<<< HEAD
+//   modularApp::setNamedMeasures(namedMeasures("time", new timeMeasure(),
+//                                              "PAPI", new PAPIMeasure(papiEvents(PAPI_TOT_INS, PAPI_L2_TC_MR))));
+//   springModularApp springApp;
+// =======
+  springModularApp mfemApp("Heat Equation"/*, namedMeasures("time0", new timeMeasure())*/); 
   
   double k = .05; // Heat transfer coefficient
   double initTemp = 10; // The initial temperature at the center of the grid

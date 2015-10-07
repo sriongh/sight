@@ -130,7 +130,7 @@ void invokeExitHandler(map<string, list<void*> >& stack, string objName) {
 void layoutStructure(structureParser& parser) {
   #ifdef VERBOSE
   //dbg << "<font color=\"#ff0000\">"<<endl;
-  cout << "layoutHandlers:\n";
+  //cout << "layoutHandlers:\n";
   for(map<std::string, layoutEnterHandler>::iterator i=layoutHandlerInstantiator::layoutEnterHandlers->begin(); i!=layoutHandlerInstantiator::layoutEnterHandlers->end(); i++)
     cout << i->first << endl;
   //dbg  << "</font>"<<endl;
@@ -669,13 +669,34 @@ std::string anchor::str(std::string indent) const {
 void* blockEnterHandler(properties::iterator props) { return new block(props); }
 void  blockExitHandler(void* obj) { block* b = static_cast<block*>(obj); delete b; }
 
-
 int block::blockCount=0;
+
+void sumDir()
+{
+  static bool hasBlock = false;
+  if(hasBlock == false)
+  {
+    pair<string, string> paths = dbg.createWidgetDir("sum_graph");
+
+    outDir = paths.first;
+    htmlOutDir = paths.second;
+    
+    dbg.includeFile("sum_graph/processing.js"); dbg.includeWidgetScript("sum_graph/processing.js", "text/javascript");
+    dbg.includeFile("sum_graph/flgr.js"); dbg.includeWidgetScript("sum_graph/flgr.js", "text/javascript");
+    dbg.includeFile("sum_graph/flGra.pde");
+    dbg.includeFile("sum_graph/index.html");
+    hasBlock = true;
+  }
+}
 
 // Initializes this block with the given properties
 block::block(properties::iterator props) : sightObj(props.next()), startA(/*false,*/ -1) /*=noAnchor, except that noAnchor may not yet be initialized)*/ {
   assert(initializedDebug);
+ 
+  sumDir();
+
   label = properties::get(props, "label");
+
   // Record the ID assigned to this block in the structure layer
   blockIDFromStructure = properties::getInt(props, "ID");
   long numAnchors = properties::getInt(props, "numAnchors");
@@ -691,6 +712,71 @@ block::block(properties::iterator props) : sightObj(props.next()), startA(/*fals
   }
   
   startA.setID(properties::getInt(props, "anchorID"));
+
+  // hoa edit here
+  // addNode
+  // cout << "blockIDFromStructure = " << blockIDFromStructure << 
+  //        " block label = " << label << " blockIndex=" << dbg.blockIndex() << 
+  //        " parentBlockIndex="<< dbg.parentBlockIndex() << 
+  //        " blockDepth=" << dbg.blockDepth() << 
+  //        " getParentBlock="<<dbg.getParentBlock()->getLabel()<<
+  //        " parent ID="<<dbg.getParentBlock()->blockIDFromStructure<< endl;
+  
+  // flowgraph f;
+  //f.addNode(txt()<<"H_"<<label, txt()<<omp_get_thread_num(), 1, 1, startA);  
+  // create hoaviz canvas
+  ostringstream canvasFName;
+  canvasFName << outDir << "/hoaviz_canvas3.txt";
+  std::ofstream canvasFile;
+  canvasFile.open(canvasFName.str().c_str());
+  canvasFile <<"<canvas id=\"flGra\" data-processing-sources=\"widgets/sum_graph/flGra.pde\" width=\"100%\" height=\"100%\"> </canvas>"<< endl;
+  canvasFile.close();
+
+  ostringstream tFName;
+  tFName << outDir << "/node_0.txt";
+  std::ofstream tFile;
+  tFile.open(tFName.str().c_str(), std::fstream::app);
+  int par = dbg.getParentBlock()->blockIDFromStructure - 1;
+  if(par > 20000)
+    par = -1;
+  int bID = blockIDFromStructure-1;
+
+  tFile << bID << ":" << bID<<"_"<<label << ":0:0:" << par << endl;
+  tFile.close();
+
+  ostringstream linkFName;
+  linkFName << outDir << "/link_0.txt";
+  ofstream linkFile;
+  linkFile.open(linkFName.str().c_str(), std::fstream::app);
+  linkFile << bID << ":" << startA.getLinkJS() << endl;
+  linkFile.close();
+
+  // input_output file
+  ostringstream inouFName;
+  inouFName << outDir << "/inout_0.txt";
+  ofstream inouFile;
+  inouFile.open(inouFName.str().c_str(), std::fstream::app);
+  inouFile.close();
+  // data for statistic visualization
+  ostringstream datFName;
+  datFName << outDir << "/dat_0.txt";
+  ofstream datFile;
+  datFile.open(datFName.str().c_str(), std::fstream::app);
+  datFile.close();
+  // data for input and output variable information of modules
+  ostringstream ioInfoFName;
+  ioInfoFName << outDir << "/ioInfo_0.txt";
+  ofstream ioInfoFile;  
+  ioInfoFile.open(ioInfoFName.str().c_str(), std::fstream::app);
+  ioInfoFile.close();
+  // vertical/horizontal layout
+  ostringstream vhFName;
+  vhFName << outDir << "/vert_hori_0.txt";  
+  ofstream vhFile;
+  vhFile.open(vhFName.str().c_str(), std::fstream::app);
+  vhFile.close();
+
+  
 #ifdef VERBOSE2
   dbg << "    startA="<<startA.str()<<", ID="<<startA.getID()<<endl;
 #endif
@@ -710,6 +796,7 @@ block::block(string label) : sightObj(), label(label), startA(/*false,*/ -1) /*=
   scriptEpilogFile = dbg.getCurScriptEpilogFile();// assert(scriptEpilogFile); 
 
   blockCount++;
+  sumDir();
 }
 
 block::~block() {
@@ -1011,17 +1098,7 @@ void dbgBuf::enterBlock(block* b, bool isAttrSubBlock)
 //   don't add any additional indentation.
 block* dbgBuf::exitBlock(bool isAttrSubBlock)
 {
-  //cout << "exitBlock("<<funcName<<") numOpenAngles="<<numOpenAngles<<endl;
-  /*if(funcName != blocks.back()) { 
-    cout << "dbgStream::exitBlock() ERROR: exiting from block "<<b.getLabel()<<" which is not the most recent function entered!\n";
-    cout << "blocks=\n";
-    for(list<string>::iterator f=blocks.begin(); f!=blocks.end(); f++)
-      cout << "    "<<*f<<"\n";
-    cout.flush();
-    baseBuf->pubsync();
-    exit(-1);
-  }*/
-  
+ 
   assert(blocks.size()>0);
   block* lastB = blocks.back();
   blocks.pop_back();
@@ -1346,6 +1423,15 @@ int dbgStream::parentBlockIndex() const {
   }
 }
 
+// Returns a pointer to the parent block
+block* dbgStream::getParentBlock() const {
+  assert(blocks.size()>0);
+  if(blocks.back().second.size()==0)
+    return blocks.back().first;
+  else
+    return blocks.back().second.back();
+}
+
 // Enter a new file level. Return a string that contains the JavaScript command to open this file in the current view.
 string dbgStream::enterFileLevel(block* b, bool topLevel)
 {
@@ -1525,6 +1611,8 @@ void dbgStream::printSummaryFileContainerHTML(string absoluteFileName, string re
   catch (ofstream::failure e)
   { cout << "dbgStream::init() ERROR opening file \""<<fullFName.str()<<"\" for writing!"; exit(-1); }
   
+   // cout << "print summary html" << endl;
+ 
   sum << "<html>\n";
   sum << "\t<head>\n";
   sum << "\t<title>"<<title<<"</title>\n";
@@ -1535,6 +1623,37 @@ void dbgStream::printSummaryFileContainerHTML(string absoluteFileName, string re
   sum << "\t<script src=\"script/core.js\"></script>\n";
   sum << "\t<script src=\"script/orderedDivs.js\"></script>\n";
   sum << "\t<script src=\"script/uniqueMark.js\"></script>\n";
+  // hoa edit
+  sum << "\t<script src=\"script/taffydb/taffy.js\"></script>\n";
+  sum << "\t<script src=\"widgets/sum_graph/processing.js\"></script>\n";  
+  sum << "\t<script src=\"widgets/sum_graph/flgr.js\"></script>\n";
+  sum << "\t<script type=\"text/javascript\"> function getProcessingSketchId () { return 'flGra'; } </script>\n";
+ 
+  sum << "\t<STYLE TYPE=\"text/css\">\n";
+  sum << "\tBODY\n";
+  sum << "\t\t{\n";
+  sum << "\t\tfont-family:courier;\n";
+  sum << "\t\t}\n";
+  sum << "\t.hidden { display: none; }\n";
+  sum << "\t.unhidden { display: block; }\n";
+  sum << "\t</style>\n";
+  sum << "\t<script type=\"text/javascript\">\n";
+  sum << "\t\twindow.onload=function () { \n";
+  string fileID = fileLevelStr(loc);
+  sum << "\t\t\tloadScriptsInFile(document, 'script/script_includes', \n";
+  sum << "\t\t\t\tfunction() { loadURLIntoDiv(document, 'summary."<<fileID<<".body', 'detailContents', \n";
+  sum << "\t\t\t\t\tfunction() { loadjscssfile('script/script."<<fileID<<".prolog', 'text/javascript',\n";
+  sum << "\t\t\t\t\t\tfunction() { loadjscssfile('script/script."<<fileID<<"', 'text/javascript',\n";//, \n";
+  sum << "\t\t\t\t\t\tfunction() { loadjscssfile('script/script."<<fileID<<".epilog', 'text/javascript'\n";//, \n";
+  sum << "\t\t\t\t\t\t\t); }\n";
+  sum << "\t\t\t\t\t\t); }\n";
+  sum << "\t\t\t\t\t); }\n";
+  sum << "\t\t\t\t); }\n";
+  sum << "\t\t\t);\n";
+  sum << "\t\t}\n";
+  sum << "\t</script>\n";
+
+  sum << "\t<script> loadURLIntoDiv2(document, 'widgets/sum_graph/hoaviz_canvas3.txt', 'canvas3') </script>\n";
   sum << "\t<script type=\"text/javascript\">\n";
   sum << "\tfunction loadURLIntoDiv(doc, url, divName) {\n";
   sum << "\t\tvar xhr= new XMLHttpRequest();\n";
@@ -1553,6 +1672,8 @@ void dbgStream::printSummaryFileContainerHTML(string absoluteFileName, string re
   sum << "\t</head>\n";
   sum << "\t<body>\n";
   sum << "\t<h1>Summary</h1>\n";
+  sum << "\t\t\t<div id=\"canvas3\" width=\"2\" height=\"2\" class=\"unhidden\"> <div id = \"content\"></div> </div>\n";
+
   sum << "\t<div id='detailContents'></div>\n";
   sum << "\t</body>\n";
   sum << "</html>\n\n";
@@ -1570,6 +1691,12 @@ void dbgStream::printDetailFileContainerHTML(string absoluteFileName, string tit
   det << "\t<head>\n";
   det << "\t<title>"<<title<<"</title>\n";
   //det << "\t<script type='text/javascript' src='https://www.google.com/jsapi?autoload={\"modules\":[{\"name\":\"visualization\",\"version\":\"1\",\"packages\":[\"orgchart\"]}]}'></script>\n";
+  // hoa edit
+  det << "\t<script src=\"widgets/module/processing.js\"></script>\n";
+  det << "\t<script type=\"text/javascript\"> function getProcessingSketchId () { return 'flGra'; } </script>\n";
+  det << "\t<script src=\"widgets/module/module.js\"></script>\n";
+  det << "\t<script src=\"widgets/module/flgr.js\"></script>\n";
+  det << "\t<script src=\"widgets/flowgraph/flgr.js\"></script>\n";
   det << "\t<script src=\"script/hashtable.js\"></script>\n";
   det << "\t<script src=\"script/skiplists.js\"></script>\n";
   det << "\t<script src=\"script/taffydb/taffy.js\"></script>\n";
@@ -1602,6 +1729,10 @@ void dbgStream::printDetailFileContainerHTML(string absoluteFileName, string tit
   det << "\t\t\t);\n";
   det << "\t\t}\n";
   det << "\t</script>\n";
+  // hoa edit
+  det << "\t<script> loadURLIntoDiv2(document, 'widgets/module/hoaviz_canvas.txt', 'canvas') </script>\n";
+  det << "\t<script> loadURLIntoDiv2(document, 'widgets/flowgraph/hoaviz_canvas2.txt', 'canvas2') </script>\n";
+
   det << "\t</head>\n";
   det << "\t<body>\n";
   /*det << "<div id=\"attrTable\"></div>\n";
@@ -1625,6 +1756,34 @@ void dbgStream::printDetailFileContainerHTML(string absoluteFileName, string tit
 
   det << "\t\t<table width=\"100%\">\n";
   det << "\t\t\t<tr width=\"100%\"><td width=50></td><td width=\"100%\">\n";
+  
+  // hoa edit
+  /*
+  ifstream in("widgets/module/node_0.txt");
+  if(in.is_open())
+  {
+    bool empty = ( in.get(), in.eof() );
+    if( empty == 0)
+      det << "\t\t\t<div id=\"canvas\" width=\"100%\" height=\"100%\" class=\"hidden\"> <div id = \"content\"> </div> </div>\n";
+    else
+      det << "\t\t\t<div id=\"canvas\" width=\"100%\" height=\"100%\" class=\"unhidden\"> <div id = \"content\"> </div> </div>\n";
+  }
+  
+  ifstream in2("widgets/flowgraph/node_0.txt");
+  if(in2.is_open())
+  {
+    bool empty2 = ( in2.get(), in2.eof() );
+    if( empty2 == 0)
+      det << "\t\t\t<div id=\"canvas2\" width=\"100%\" height=\"100%\" class=\"hidden\"> <div id = \"content2\"> </div> </div>\n";
+    else
+      det << "\t\t\t<div id=\"canvas2\" width=\"100%\" height=\"100%\" class=\"unhidden\"> <div id = \"content2\"> </div> </div>\n";
+  }
+  */
+
+  
+  //det << "\t\t\t<div id=\"canvas\" width=\"2\" height=\"2\" class=\"unhidden\"> <div id = \"content\"> </div> </div>\n";
+  //det << "\t\t\t<div id=\"canvas2\" width=\"2\" height=\"2\" class=\"unhidden\"> <div id = \"content2\"> </div> </div>\n";
+
   det << "\t\t\t<div id='detailContents'></div>\n";
   det << "\t\t\t</td></tr>\n";
   det << "\t\t</table>\n";
@@ -1656,13 +1815,16 @@ std::string dbgStream::genLoadSubFile(const location& loc) {
 //    the start of this major block and the next setting of an attribute.
 string dbgStream::enterBlock(block* b, bool newFileEntered, bool addSummaryEntry, bool recursiveEnterBlock)
 {
+
+  // hoa uncomment
   //cout <<"dbgStream::enterBlock() recursiveEnterBlock="<<recursiveEnterBlock<<", label="<<b->getLabel()<<endl;
-  //cout << "<<<enter(newFileEntered="<<newFileEntered<<", addSummaryEntry="<<addSummaryEntry<<", recursiveEnterBlock="<<recursiveEnterBlock<<") b="<<b<<"="<<(b? b->getLabel(): "NULL")<<endl;
+ // cout << "<<<enter(newFileEntered="<<newFileEntered<<", addSummaryEntry="<<addSummaryEntry<<", recursiveEnterBlock="<<recursiveEnterBlock<<") b="<<b<<"="<<(b? b->getLabel(): "NULL")<<endl;
 //!!!  dbg << "<<<enter() fileBufs.size()="<<fileBufs.size()<<" && #blocks="<<blocks.size()<<", #blocks.back().second="<<blocks.back().second.size()<<", #fileBufs.back()->blocks="<<(fileBufs.size()==0? -1: fileBufs.back()->blocks.size())<<endl;
 /*  if(!recursiveEnterBlock)
     exitAttrSubBlock();*/
+ // cout << "<<<enterBlock: b="<<b<<", newFileEntered="<<newFileEntered<<", addSummaryEntry="<<addSummaryEntry<<", recursiveEnterBlock="<<recursiveEnterBlock<<endl;
   
-  //cout << "<<<enterBlock: b="<<b<<", newFileEntered="<<newFileEntered<<", addSummaryEntry="<<addSummaryEntry<<", recursiveEnterBlock="<<recursiveEnterBlock<<endl;
+  //cout << "enterBlock - " << b->getLabel() << endl;
   // if recursiveEnterBlock, newFileEntered and addSummaryEntry may not be
   assert(!addSummaryEntry || !(recursiveEnterBlock && newFileEntered));
   //(*this) << "dbgStream::enterBlock("<<(b? b->getLabel(): "NULL")<<")"<<endl;
@@ -1771,6 +1933,9 @@ block* dbgStream::exitBlock(bool recursiveExitBlock)
   // Remove this block from the record of the block nesting structure
   assert(blocks.size()>0);
   assert(blocks.back().second.size()>0);
+
+  // hoa note
+  // last block
   block* topB = blocks.back().second.back();
   blocks.back().second.pop_back();
   fileBufs.back()->userAccessing();

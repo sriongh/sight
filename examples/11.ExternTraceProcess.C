@@ -24,7 +24,11 @@ int main (int argc, char *argv[])
     }
   }
   
+<<<<<<< HEAD
   //modularApp mfemApp("Processed App"); 
+=======
+  modularApp mfemApp("Processed App"); 
+>>>>>>> old_sight/mergeHoaViz
   
   for(int i=0; i<50; i++) {
     std::vector<port> externalOutputs;

@@ -17,6 +17,11 @@
 * SOURCE: Vijay Sonnad, IBM
 * LAST REVISED:  01/29/09 Blaise Barney
 ******************************************************************************/
+<<<<<<< HEAD
+=======
+//#include <pthread.h>
+#include "sight.h"
+>>>>>>> old_sight/mergeHoaViz
 #include "sight_pthread.h"
 using namespace sight;
 #include <stdio.h>

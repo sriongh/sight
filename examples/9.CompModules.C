@@ -24,9 +24,10 @@ int main (int argc, char *argv[])
   
   SightInit(argc, argv, "9.CompModules", txt()<<"dbg.9.CompModules.dx_"<<dx<<".dy_"<<dy<<".dt_"<<dt<<".k="<<k<<(isReference? ".Reference": ""));
 
-  //compModularApp mfemApp("Heat Equation"/*, namedMeasures("time0", new timeMeasure())*/);
-  modularApp::setNamedMeasures(namedMeasures("time", new timeMeasure(),
-                                             "PAPI", new PAPIMeasure(papiEvents(PAPI_TOT_INS, PAPI_L2_TC_MR))));
+  // //compModularApp mfemApp("Heat Equation"/*, namedMeasures("time0", new timeMeasure())*/);
+  // modularApp::setNamedMeasures(namedMeasures("time", new timeMeasure(),
+  //                                            "PAPI", new PAPIMeasure(papiEvents(PAPI_TOT_INS, PAPI_L2_TC_MR))));
+  compModularApp mfemApp("Heat Equation"/*, namedMeasures("time0", new timeMeasure())*/); 
   
   double initTemp = 10; // The initial temperature at the center of the grid
   
@@ -100,6 +101,12 @@ int main (int argc, char *argv[])
                                      "initTemp", initTemp))),
                  externalOutputs,
                  isReference,
+
+  // compModule mod(instance("Heat Computation", 1, 1), 
+  //                inputs(port(context("k", k,
+  //                                    "initTemp", initTemp))),
+  //                externalOutputs,
+  //                isReference, 
                  context("dx", dx,
                          "dy", dy,
                          "dt", dt),
@@ -109,16 +116,15 @@ int main (int argc, char *argv[])
   // Time step 
   for(int t=0; t<T; t++) {
     std::vector<port> externalTSOutputs;
-    compModule tsMod(instance("TimeStep", 3, /*1*/0),
+    compModule tsMod(instance("TimeStep", 3, 1), 
                  inputs(port(context("k", k,
                                      "initTemp", initTemp)),
                         port(context("t", t)),
                         //port(compContext("temp", sightArray(sightArray::dims(X,Y), nextTemp), LkComp(2, attrValue::floatT, true)))),
-                        port(compContext("temp",  sightVectorField(sightArray(sightArray::dims(X, Y), nextTemp), spatialDiscretizationBasis),
-                                         LkComp(2, attrValue::floatT, true)))
-                        ),
+                        port(compContext("temp",  sightVectorField(sightArray(sightArray::dims(X, Y), nextTemp), spatialDiscretizationBasis), 
+                                         LkComp(2, attrValue::floatT, true)))),
                  externalTSOutputs,
-                 isReference,
+                 isReference, 
                  context("dx", dx,
                          "dy", dy,
                          "dt", dt),
@@ -174,6 +180,15 @@ int main (int argc, char *argv[])
   }
 /*  mod.setOutCtxt(0, compContext("temp", sightVectorField(sightArray(sightArray::dims(X, Y), nextTemp), spatialDiscretizationBasis),
                                 LkComp(2, attrValue::floatT, true)));*/
+//     //tsMod.setOutCtxt(0, compContext("temp", sightArray(sightArray::dims(X,Y), nextTemp), LkComp(2, attrValue::floatT, true)));
+//     tsMod.setOutCtxt(0, compContext("temp", sightVectorField(sightArray(sightArray::dims(X, Y), nextTemp), spatialDiscretizationBasis),
+//                                     LkComp(2, attrValue::floatT, true)));
+//     //cout << ">"<<endl;
+//   }
+//   //mod.setOutCtxt(0, compContext("temp", sightArray(sightArray::dims(X,Y), nextTemp), LkComp(2, attrValue::floatT, true)));
+//   mod.setOutCtxt(0, compContext("temp", sightVectorField(sightArray(sightArray::dims(X, Y), nextTemp), spatialDiscretizationBasis),
+//                                 LkComp(2, attrValue::floatT, true)));
+// >>>>>>> old_sight/mergeHoaViz
   
   delete nextTemp;
   delete lastTemp;

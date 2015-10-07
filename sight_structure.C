@@ -83,6 +83,24 @@ std::map<pthread_t, map<dbgStream*, std::list<sightObj*> >* > threadSoStacks;
 pthread_mutex_t threadSoStacksMutex = PTHREAD_MUTEX_INITIALIZER;
 
 std::list<sightObj*>& soStack(dbgStream* outStream) {
+  // hoa edit
+  //cout << pthread_self() << "               soStack - input Thread#" << pthread_self() << endl;
+  // hoa edit
+  // threadSoStack content
+  /*
+  typedef std::map<pthread_t, map<dbgStream*, std::list<sightObj*> >* >::const_iterator threadIterator;
+  for(threadIterator i = threadSoStacks.begin(); i != threadSoStacks.end(); i++)
+  {
+    cout << "threadID " << i->first << " in staticSoStacks after soStack() call"<< endl;    
+  }
+  */ 
+  /*
+  typedef std::map<dbgStream*, std::list<sightObj*> >::const_iterator stIterator;
+  for(stIterator i = staticSoStack.begin(); i != staticSoStack.end(); i++)
+  {
+    cout << pthread_self() << "                dbgStream " << i->first << " in staticSoStacks after soStack() call"<< endl;    
+  } 
+  */
   return staticSoStack[outStream];
 }
 
@@ -155,6 +173,7 @@ void ThreadInitFinInstantiator::init() {
 void ThreadInitFinInstantiator::addFuncs(const std::string& label, ThreadInitializer init, ThreadFinalizer fin,
                 const common::easyset<std::string>& mustFollow, const common::easyset<std::string>& mustPrecede) {
   //cout << "ThreadInitFinInstantiator::addFuncs()"<<endl;
+\
   assert(funcsM);
   assert(funcsV);
   
@@ -224,11 +243,13 @@ void ThreadInitFinInstantiator::computeDepGraph() {
 void ThreadInitFinInstantiator::initialize() {
   computeDepGraph();
   
-  /*cout << pthread_self()<<": ThreadInitFinInstantiator::initialize()"<<endl;
+  // hoa edit
+  /*
+  cout <<": ThreadInitFinInstantiator::initialize() - Thread#" <<  pthread_self() <<endl;
   for(std::map<std::string, threadFuncs*>::iterator i=funcsM->begin(); i!=funcsM->end(); i++)
     cout << "    "<<i->first<<": "<<i->second->UID<<endl;
- 
-  cout << pthread_self()<<": #topoOrder="<<topoOrder->size()<<endl; */
+  cout << "Thread# " << pthread_self()<<": #topoOrder="<<topoOrder->size()<<endl;
+  */
   for(deque<int>::iterator i=topoOrder->begin(); i!=topoOrder->end(); ++i) {
     assert(funcsV->size()>*i);
     (*funcsV)[*i]->init();
@@ -240,16 +261,24 @@ void ThreadInitFinInstantiator::initialize() {
 
 // Calls all the finalizers in their topological order (reverse of initializers)
 void ThreadInitFinInstantiator::finalize() {
-  computeDepGraph();
-  
-  // Trim this tread's stack down to its height immediately after initialization
-  sightObj::destroyThreadStack(initializedSOStackHeight);
 
-  // Call the finalizers
+  
+  computeDepGraph();
+ 
+  //cout << pthread_self()<<": ThreadInitFinInstantiator::finalize() "<<endl; 
   for(deque<int>::reverse_iterator i=topoOrder->rbegin(); i!=topoOrder->rend(); ++i) {
+    //cout << pthread_self()<<":    i="<<*i<<", "<<(*funcsV)[*i]->UID<<":"<<(*funcsV)[*i]->str()<<endl;
     assert(funcsV->size()>*i);
     (*funcsV)[*i]->fin();
   }
+  // hoa edit
+  /*
+  for(std::map<std::string, threadFuncs*>::reverse_iterator i=funcsM->rbegin(); i!=funcsM->rend(); ++i) 
+    cout << "    "<<i->first<<": "<<i->second->UID<<endl;
+  cout << "Finalized Thread# " << pthread_self()<<": #topoOrder="<<topoOrder->size()<<endl;
+  */
+  // fix finalize problem
+  dbg->flush();
 }
 
 std::string ThreadInitFinInstantiator::str() {
@@ -291,7 +320,9 @@ ThreadLocalStorage1<int, int> outputStreamID(0);
 // Provides the output directory and run title as well as the arguments that are required to rerun the application
 void SightInit(int argc, char** argv, string title, string workDir)
 {
-  //cout << pthread_self() << ": SightInit() initializedDebugMainThread="<<initializedDebugMainThread<<", initializedDebugThisThread="<<initializedDebugThisThread<<endl;
+
+  //cout << "Thread# "<< pthread_self() << ": SightInit() initializedDebugMainThread="<<initializedDebugMainThread<<", initializedDebugThisThread="<<initializedDebugThisThread<<endl;
+  
   // If Sight has already been initialized in the main thread, abort since main thread initialization can only be done directly by the user
   if(initializedDebugMainThread) { cerr << "ERROR: Sight has been initialized multiple times!"<<endl; assert(0); }
   // If Sight has been implicitly initialized in this thread, emit a warning since the parameters from explicit initialization are not being used
@@ -312,7 +343,8 @@ void SightInit(string title, string workDir)
 // Called from within Sight when some code region discovers that it is being invoked
 // before Sight has been initialized on the current thread.
 void SightInit_NewThread() {
-  //cout << pthread_self() << ": SightInit_NewThread() initializedDebugMainThread="<<initializedDebugMainThread<<", initializedDebugThisThread="<<initializedDebugThisThread<<endl;
+  //cout << "Thread# " << pthread_self() << ": SightInit_NewThread() initializedDebugMainThread="<<initializedDebugMainThread<<", initializedDebugThisThread="<<initializedDebugThisThread<<endl;
+  
   SightInit_internal(0, NULL, "", "", false);
   /*// If Sight has already been initialized in the main thread
   if(initializedDebugMainThread) SightInit_Internal(0, NULL, "", "", false);
@@ -341,7 +373,8 @@ void SightInit_LowLevel()
 //             Set to false if it is called inside some other, subsequently-created thread from within Sight
 void SightInit_internal(int argc, char** argv, string title, string workDir, bool mainThread)
 {
-  //cout << pthread_self()<<": SightInit_internal("+title+")"<<endl;
+
+  //cout << "Thread#" << pthread_self()<<": SightInit_internal("+title+")"<<endl;
   
   // Assign each pthread to a separate log based on its thread ID
   /*if(mainThread) {
@@ -471,29 +504,82 @@ void SightInit_internal(int argc, char** argv, string title, string workDir, boo
 }
 
 void SightThreadInit() {
-  //cout << pthread_self()<<": SightThreadInit\n";
+
+  //cout << "Thread# "<< pthread_self()<<": SightThreadInit\n";
+
   // Set this thread to be cancelable
   pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
   pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
   // Register this thread's soStacks in threadSoStacks
   pthread_mutex_lock(&threadSoStacksMutex);
-  threadSoStacks[pthread_self()] = staticSoStack.get();
+
+// <<<<<<< HEAD
+//   threadSoStacks[pthread_self()] = staticSoStack.get();
   
+//   ThreadInitFinInstantiator::initialize();
+  
+//   pthread_mutex_unlock(&threadSoStacksMutex);
+// }
+
+// void SightThreadFinalize() {
+// //  cout << pthread_self()<<": SightThreadFinalize\n";
+//   // Unregister this thread's soStacks from threadSoStacks
+//   pthread_mutex_lock(&threadSoStacksMutex);
+//   if(threadSoStacks.find(pthread_self()) != threadSoStacks.end()) {
+// //    cout << pthread_self()<<": SightThreadFinalize()"<<endl;
+//     threadSoStacks.erase(pthread_self());
+
+//     ThreadInitFinInstantiator::finalize();
+// =======
+
+  // hoa edit
+  //cout << "Input threadSoStacks Thread#" << pthread_self() << endl;
+  
+  threadSoStacks[pthread_self()] = staticSoStack.get();
+
   ThreadInitFinInstantiator::initialize();
   
   pthread_mutex_unlock(&threadSoStacksMutex);
+
+  // hoa edit
+  // threadSoStack content
+  /*
+  typedef std::map<pthread_t, map<dbgStream*, std::list<sightObj*> >* >::const_iterator threadIterator;
+  for(threadIterator i = threadSoStacks.begin(); i != threadSoStacks.end(); i++)
+  {
+    cout << "threadID " << i->first << " in threadSoStacks of SightThreadInit"<< endl;
+  }
+  */
 }
 
+
 void SightThreadFinalize() {
-//  cout << pthread_self()<<": SightThreadFinalize\n";
+  //cout << pthread_self()<<": SightThreadFinalize\n";
+
+    // hoa edit
+  // threadSoStack content
+  /*
+  typedef std::map<pthread_t, map<dbgStream*, std::list<sightObj*> >* >::const_iterator threadIterator;  
+  cout << pthread_self()<<":"<< "SightThreadFinalize: threadSoStack"<<endl;
+  for(threadIterator i = threadSoStacks.begin(); i != threadSoStacks.end(); i++)
+  {
+    cout << pthread_self()<<"    threadID " << i->first << endl;
+    typedef std::map<dbgStream*, std::list<sightObj*> >::const_iterator stIterator;
+    for(stIterator j = i->second->begin(); j != i->second->end(); j++)
+    {
+      cout << pthread_self()<<"        dbgStream " << j->first << endl;
+    } 
+  }
+  */
+
   // Unregister this thread's soStacks from threadSoStacks
   pthread_mutex_lock(&threadSoStacksMutex);
   if(threadSoStacks.find(pthread_self()) != threadSoStacks.end()) {
-//    cout << pthread_self()<<": SightThreadFinalize()"<<endl;
     threadSoStacks.erase(pthread_self());
 
     ThreadInitFinInstantiator::finalize();
+
     // Delete the comparison tags that wrap the entire log of this thread
     //assert(globalComparisonIDs.size() == globalComparisons.size());
 /*    while(globalComparisons.size()>0) {
@@ -515,6 +601,8 @@ void SightThreadFinalize() {
       delete *i;
     }*/
 //    cout << ">>>SightThreadFinalize"<<endl;
+      //cout << "SightThreadFinalize() - Thread# " << pthread_self()<<endl;
+    
   }
   pthread_mutex_unlock(&threadSoStacksMutex);
 }
@@ -736,7 +824,9 @@ void sightObj::init(properties* props, bool isTag) {
   if(initializedDebugMainThread && !initializedDebugThisThread) SightInit_NewThread();
   
   assert(outStream);
-//  cout << "sightObj::sightObj isTag="<<isTag<<" props="<<(props? props->str(): "NULL")<<endl;
+
+  //cout << "sightObj::sightObj isTag="<<isTag<<" props="<<(props? props->str(): "NULL")<<endl;
+
   if(props && props->active && props->emitTag) {
     // Add the properties of any clocks associated with this sightObj
     for(map<string, set<sightClock*> >::iterator i=clocks.begin(); i!=clocks.end(); i++) {
@@ -758,7 +848,8 @@ void sightObj::init(properties* props, bool isTag) {
   
   // Push this sightObj onto the stack if Sight has already been initialized on the main thread
   if(initializedDebugMainThread && emitExitTag) {
-//    cout << "[[[ "<<(props? props->str(): "NULL")<<endl;
+    //cout << "[[[ "<<(props? props->str(): "NULL")<<endl;
+
     soStack(outStream).push_back(this);
   }
   
@@ -808,10 +899,12 @@ sightObj::~sightObj() {
   if(destroyed) return;
   assert(outStream);
   
-/*  if(soStack(outStream).size()>0 && emitExitTag) {
+  /*
+  if(soStack(outStream).size()>0 && emitExitTag) {
     cout << "]]](#"<<soStack(outStream).size()<<") props="<<(props? props->str(): "NULL")<<endl;
     cout << "soStack(outStream).back()="<<(soStack(outStream).back()->props? soStack(outStream).back()->props->str(): "NULL")<<endl;
-  }*/
+  }
+  */
   
   // If the application calls to exit(), this will call the destructors of all the static objects
   // but not those on the stack or heap. As such, it is possible to reach the destructor of an object
@@ -833,6 +926,7 @@ sightObj::~sightObj() {
         else            cerr << ": NULL"<<endl;
       }
       //if(soStack(outStream).back()->props) cerr << "Top of stack: "<<soStack(outStream).back()->props->str()<<endl;
+
     }
     assert(soStack(outStream).back() == this);
     soStack(outStream).pop_back();
@@ -868,17 +962,20 @@ void sightObj::destroyAll(map<dbgStream*, list<sightObj*> >* stack) {
 //  map<dbgStream*, list<sightObj*> >& stack = soStackAllStreams();
   if(stack==NULL) stack = &soStackAllStreams();
   assert(stack);
-//  cout << pthread_self()<<": sightObj::destroyAll() <<<< stack="<<stack<<", #stack="<<stack->size()<<endl;
+ //cout << pthread_self()<<": sightObj::destroyAll() <<<< stack="<<stack<<", #stack="<<stack->size()<<endl;
   for(map<dbgStream*, list<sightObj*> >::iterator s=stack->begin(); s!=stack->end(); s++) {
     while(s->second.size()>0) {
       list<sightObj*>::reverse_iterator o=s->second.rbegin();
   //    if((*o)->emitExitTag) {
         if((*o)->props) {
-//          cout << ">!> "<<(*o)->props->name()<<endl;
+          //cout << ">!> "<<(*o)->props->name()<<endl;
+
           assert(!stackMayBeInvalidFlag);
           (*o)->destroy();
         } else {
-//          cout << ">!> NULL"<<endl;
+
+          //cout << ">!> NULL"<<endl;
+
           s->second.pop_back();
         }
   //    }
@@ -2027,7 +2124,15 @@ block::~block() {
   
   assert(props);
   if(props->active && props->emitTag)
-    dbg->exitBlock();
+// <<<<<<< HEAD
+//     dbg->exitBlock();
+// =======
+  {
+    //cout << "exitBlock Thread - " << pthread_self() << endl;
+
+    //dbg->exitBlock();
+    outStream->exitBlock();
+  }
 }
 
 // Increments blockD. This function serves as the one location that we can use to target conditional
@@ -2435,6 +2540,8 @@ void dbgStream::enterBlock(block* b) {
 // Called when a block is exited. Returns the block that was exited.
 block* dbgStream::exitBlock() {
   INIT_CHECK_RET(NULL) // Ensure that Sight is correctly initialized
+  //if(blocks.size()>0)
+  //cout << "Thread exitBlock - " << pthread_self() << endl;
   assert(blocks.size()>0);
  
   loc.exitBlock();

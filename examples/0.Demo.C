@@ -2,6 +2,7 @@
 #include <vector>
 #include <assert.h>
 #include "sight.h"
+#include "sight_pthread.h"
 #include <unistd.h>
 //using namespace std;
 using namespace sight;
@@ -19,7 +20,9 @@ int fibScopeLinks(int a, scope::scopeLevel level, list<int>& stack,
                   bool doFWLinks);
 int fibGraph(int a, graph& g, anchor* parent);
 double histRecurrence(int a, const vector<double>& hist);
+// hoa edit
 std::pair<int, std::vector<port> > fibModule(int a, int depth);
+//int fibModule(int a, int depth);
 
 int main(int argc, char** argv)
 {
@@ -31,49 +34,49 @@ int main(int argc, char** argv)
   string thisFile = txt()<<ROOT_PATH<<"/examples/0.Demo.C";
   
   SightInit(argc, argv, "Demo", txt()<<"dbg.0.Demo.maxDepth_"<<maxDepth);
+ 
+//   dbg << "<h1>Demonstration of Sight</h1>" << endl;
   
-  dbg << "<h1>Demonstration of Sight</h1>" << endl;
-  
-  { 
-    scope s("No formatting", scope::high);
-    { sight::structure::source src("source", source::regions(source::reg(thisFile, "NFStart",      "NFEnd"),
-                                           source::reg(thisFile, "fibBaseStart", "fibBaseEnd"))); }
+//   { 
+//     scope s("No formatting", scope::high);
+//     { sight::structure::source src("source", source::regions(source::reg(thisFile, "NFStart",      "NFEnd"),
+//                                            source::reg(thisFile, "fibBaseStart", "fibBaseEnd"))); }
     
-#pragma sightLoc NFStart
-    for(int depth=1; depth<maxDepth; depth++) {
-      dbg << "<<<<< Depth "<<depth<<" <<<<<"<<endl;
-      fibBase(depth);
-      dbg << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
-    }
-#pragma sightLoc NFEnd
-  }
+// #pragma sightLoc NFStart
+//     for(int depth=1; depth<maxDepth; depth++) {
+//       dbg << "<<<<< Depth "<<depth<<" <<<<<"<<endl;
+//       fibBase(depth);
+//       dbg << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
+//     }
+// #pragma sightLoc NFEnd
+//   }
   
-  { 
-    scope s("Indentation", scope::high);
-    { sight::structure::source src("source", source::regions(source::reg(thisFile, "IndStart",       "IndEnd"),
-                                           source::reg(thisFile, "fibIndentStart", "fibIndentEnd"))); }
+//   { 
+//     scope s("Indentation", scope::high);
+//     { sight::structure::source src("source", source::regions(source::reg(thisFile, "IndStart",       "IndEnd"),
+//                                            source::reg(thisFile, "fibIndentStart", "fibIndentEnd"))); }
     
-#pragma sightLoc IndStart
-    for(int depth=1; depth<maxDepth; depth++) {
-      dbg << "<<<<< Depth "<<depth<<" <<<<<"<<endl;
-      fibIndent(depth);
-      dbg << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
-    }
-#pragma sightLoc IndEnd
-  }
+// #pragma sightLoc IndStart
+//     for(int depth=1; depth<maxDepth; depth++) {
+//       dbg << "<<<<< Depth "<<depth<<" <<<<<"<<endl;
+//       fibIndent(depth);
+//       dbg << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
+//     }
+// #pragma sightLoc IndEnd
+//   }
   
-  { 
-    scope s("Indentation Mixed with Scoping", scope::high);
-    { sight::structure::source src("source", source::regions(source::reg(thisFile, "IndScopeStart",  "IndScopeEnd"),
-                                           source::reg(thisFile, "fibIndentStart", "fibIndentEnd"))); }
+//   { 
+//     scope s("Indentation Mixed with Scoping", scope::high);
+//     { sight::structure::source src("source", source::regions(source::reg(thisFile, "IndScopeStart",  "IndScopeEnd"),
+//                                            source::reg(thisFile, "fibIndentStart", "fibIndentEnd"))); }
     
-#pragma sightLoc IndScopeStart
-    for(int depth=1; depth<maxDepth; depth++) {
-      scope s2(txt()<<"Depth "<<depth);
-      fibIndent(depth);
-    }
-#pragma sightLoc IndScopeEnd
-  }
+// #pragma sightLoc IndScopeStart
+//     for(int depth=1; depth<maxDepth; depth++) {
+//       scope s2(txt()<<"Depth "<<depth);
+//       fibIndent(depth);
+//     }
+// #pragma sightLoc IndScopeEnd
+//   }
  
   { 
     scope s("Multi-level Scoping", scope::high);
@@ -88,76 +91,78 @@ int main(int argc, char** argv)
 #pragma sightLoc MultScopeEnd
   }
    
-  { 
-    scope s("Multi-level Scoping with Links", scope::high);
-    { sight::structure::source src("source", source::regions(source::reg(thisFile, "MultScopeLinksStart", "MultScopeLinksEnd"),
-                                           source::reg(thisFile, "fibScopeLinksStart",  "fibScopeLinksEnd"))); }
+
+//   { 
+//     scope s("Multi-level Scoping with Links", scope::high);
+//     { sight::structure::source src("source", source::regions(source::reg(thisFile, "MultScopeLinksStart", "MultScopeLinksEnd"),
+//                                            source::reg(thisFile, "fibScopeLinksStart",  "fibScopeLinksEnd"))); }
     
-#pragma sightLoc MultScopeLinksStart
-    map<list<int>, anchor> InFW, InBW, OutFW, OutBW;
-    for(int depth=1; depth<maxDepth; depth++) {
-      scope s2(txt()<<"Depth "<<depth, scope::high);
-      list<int> stack;
-      fibScopeLinks(depth, scope::medium, stack, InFW, InBW, OutFW, OutBW, true);
-      InFW = OutFW;
-      InBW = OutBW;
-      OutFW.clear();
-      OutBW.clear();
-    }
-#pragma sightLoc MultScopeLinksEnd
-  }
+// #pragma sightLoc MultScopeLinksStart
+//     map<list<int>, anchor> InFW, InBW, OutFW, OutBW;
+//     for(int depth=1; depth<maxDepth; depth++) {
+//       scope s2(txt()<<"Depth "<<depth, scope::high);
+//       list<int> stack;
+//       fibScopeLinks(depth, scope::medium, stack, InFW, InBW, OutFW, OutBW, true);
+//       InFW = OutFW;
+//       InBW = OutBW;
+//       OutFW.clear();
+//       OutBW.clear();
+//     }
+// #pragma sightLoc MultScopeLinksEnd
+//   }
 
-  { 
-    scope s("Multi-level Scoping with Graphs", scope::high);
-    { sight::structure::source src("source", source::regions(source::reg(thisFile, "MultScopeGraphsStart", "MultScopeGraphsEnd"),
-                                           source::reg(thisFile, "fibGraphStart",        "fibGraphEnd"))); }
+//   { 
+//     scope s("Multi-level Scoping with Graphs", scope::high);
+//     { sight::structure::source src("source", source::regions(source::reg(thisFile, "MultScopeGraphsStart", "MultScopeGraphsEnd"),
+//                                            source::reg(thisFile, "fibGraphStart",        "fibGraphEnd"))); }
 
-#pragma sightLoc MultScopeGraphsStart
-    graph g;
-    for(int depth=1; depth<maxDepth; depth++) {
-      scope s2(txt()<<"Depth "<<depth, scope::high);
-      fibGraph(depth, g, NULL);
-    }
-#pragma sightLoc MultScopeGraphsEnd
-  }
+// #pragma sightLoc MultScopeGraphsStart
+//     graph g;
+//     for(int depth=1; depth<maxDepth; depth++) {
+//       scope s2(txt()<<"Depth "<<depth, scope::high);
+//       fibGraph(depth, g, NULL);
+//     }
+// #pragma sightLoc MultScopeGraphsEnd
+//   }
 
-  {
-    scope s("Performance Analysis", scope::high);
-    { sight::structure::source src("source", source::regions(source::reg(thisFile, "PerfAnalysisStart", "PerfAnalysisEnd"),
-                                           source::reg(thisFile, "fibStart",          "fibEnd"),
-                                           source::reg(thisFile, "fibLinearStart",    "fibLinearEnd"))); }
+//   {
+//     scope s("Performance Analysis", scope::high);
+//     { sight::structure::source src("source", source::regions(source::reg(thisFile, "PerfAnalysisStart", "PerfAnalysisEnd"),
+//                                            source::reg(thisFile, "fibStart",          "fibEnd"),
+//                                            source::reg(thisFile, "fibLinearStart",    "fibLinearEnd"))); }
     
-#pragma sightLoc PerfAnalysisStart
-    trace tTime("Fib Time", "depth", trace::showBegin, trace::lines);
-    trace tValue("Fib Value", "depth", trace::showBegin, trace::table);
-    // Recursive
-    for(int depth=1; depth<30; depth++) {
-      attr depthAttr("depth", depth);
-      measure* m = startMeasure<timeMeasure>("Fib Time", "Recursive");
-      int value = fib(depth);
-      endMeasure(m);
-      traceAttr("Fib Value", "val", attrValue(value));
-    }
+// #pragma sightLoc PerfAnalysisStart
+//     trace tTime("Fib Time", "depth", trace::showBegin, trace::lines);
+//     trace tValue("Fib Value", "depth", trace::showBegin, trace::table);
+//     // Recursive
+//     for(int depth=1; depth<30; depth++) {
+//       attr depthAttr("depth", depth);
+//       measure* m = startMeasure<timeMeasure>("Fib Time", "Recursive");
+//       int value = fib(depth);
+//       endMeasure(m);
+//       traceAttr("Fib Value", "val", attrValue(value));
+//     }
 
-    // Linear
-    for(int depth=1; depth<30; depth++) {
-      attr depthAttr("depth", depth);
-      measure* m = startMeasure<timeMeasure>("Fib Time", "Recursive");
-      fibLinear(depth);
-      endMeasure(m);
-    }
-#pragma sightLoc PerfAnalysisEnd
-  }
+//     // Linear
+//     for(int depth=1; depth<30; depth++) {
+//       attr depthAttr("depth", depth);
+//       measure* m = startMeasure<timeMeasure>("Fib Time", "Recursive");
+//       fibLinear(depth);
+//       endMeasure(m);
+//     }
+// #pragma sightLoc PerfAnalysisEnd
+//   }
 
-  {
-    scope s("Modular Analysis", scope::high);
-    { sight::structure::source src("source", source::regions(source::reg(thisFile, "ModularStart",    "ModularEnd"),
-                                           source::reg(thisFile, "modularFibStart", "modularFibEnd"))); }
+//   {
+//     scope s("Modular Analysis", scope::high);
+//     { sight::structure::source src("source", source::regions(source::reg(thisFile, "ModularStart",    "ModularEnd"),
+//                                            source::reg(thisFile, "modularFibStart", "modularFibEnd"))); }
     
-#pragma sightLoc ModularStart
-    fibModule(10, 0);
-#pragma sightLoc ModularEnd
-  }
+// #pragma sightLoc ModularStart
+//     //modularApp modularFibonacci("Fibonacci"); 
+//     fibModule(5,0);
+// #pragma sightLoc ModularEnd
+//   }
 
   
 /*  { 
@@ -383,26 +388,80 @@ double histRecurrence(int a, const vector<double>& hist) {
 #pragma sightLoc histRecurrenceEnd
 
 #pragma sightLoc modularFibStart
+
 // Each recursive call to fibModule() generates a new module at the desired level. 
-std::pair<int, std::vector<port> > fibModule(int a, int depth) {
+// hoa edit
+std::pair<int, std::vector<port> > fibModule(int a, int depth)
+{
   std::vector<port> fibOutputs;
-  module m(instance(txt()<<"fib() depth="<<depth, 1, 1), 
-           inputs(port(context("a", a))), fibOutputs, namedMeasures("time", new timeMeasure()));
-  
-  if(a==0 || a==1) { 
-    dbg << "=1."<<endl;
-    
+  // hoa temp comment out
+  //module m(instance(txt()<<"fib() depth="<<depth, 1, 1),
+  //         inputs(port(context("a", a))), fibOutputs, namedMeasures("time", new timeMeasure()));
+
+  // hoa edit
+  //module m(instance(txt()<<"fib("<<a<<")", 1, 1),
+  //           inputs(port(context("depth", depth))), fibOutputs, namedMeasures("time", new timeMeasure()));
+  // origin command
+  //module m(instance(txt()<<a<<":"<<depth, 1, 1),
+  //         inputs(port(context("depth", depth))), fibOutputs, namedMeasures("time", new timeMeasure()));
+
+    module m(instance(txt()<<a<<"-"<<depth, 1, 1),
+           inputs(port(context("depth", depth))), fibOutputs, namedMeasures("time", new timeMeasure()));
+
+  if(a==0 || a==1)
+  {
+    //module m(instance(txt()<<"fib("<<a<<"):depth="<<depth, 1, 1),
+	//       inputs(port(context("depth", depth))), fibOutputs, namedMeasures("time", new timeMeasure()));
+
+	dbg << "=1."<<endl;
+
     m.setOutCtxt(0, context("val", 1));
-    
+
     return make_pair(1, fibOutputs);
-  } else {
+  }
+  else
+  {
+    //module m(instance(txt()<<"fib("<<a<<")=fib("<<a-1<<"),fib("<<a-2<<"):depth="<<depth, 1, 1),
+	//       inputs(port(context("depth", depth))), fibOutputs, namedMeasures("time", new timeMeasure()));
+
     std::pair<int, std::vector<port> > ret1 = fibModule(a-1, depth+1);
     std::pair<int, std::vector<port> > ret2 = fibModule(a-2, depth+1);
     dbg << "="<<(ret1.first + ret2.first)<<endl;
-    
     m.setOutCtxt(0, context("val", ret1.first + ret2.first));
-    
+
     return make_pair(ret1.first + ret2.first, fibOutputs);
   }
 }
+
+/*
+int fibModule(int a, int depth)
+{
+  std::vector<port> fibOutputs;
+  // hoa temp comment out
+  //module m(instance(txt()<<"fib() depth="<<depth, 1, 1),
+  //         inputs(port(context("a", a))), fibOutputs, namedMeasures("time", new timeMeasure()));
+
+  // hoa edit
+  module m(instance(txt()<<"fib("<<a<<")", 1, 1),
+             inputs(port(context("depth", depth))), fibOutputs, namedMeasures("time", new timeMeasure()));
+
+  if(a==0 || a==1)
+  {
+    dbg << "=1."<<endl;
+    m.setOutCtxt(0, context("val", 1));
+    //return make_pair(1, fibOutputs);
+    return 1;
+  }
+  else
+  {
+    int ret1 = fibModule(a-1, depth+1);
+    int ret2 = fibModule(a-2, depth+1);
+    int va = fibModule(a-1, depth+1) + fibModule(a-2, depth+1);
+    dbg << "="<< va <<endl;
+    //dbg << "="<<"fib("<<a-1<<")"<< fibModule(a-1, depth+1) << "fib("<<a-2<<")" <<  fibModule(a-2, depth+1) <<endl;
+    m.setOutCtxt(0, context("val", va));
+    return va;
+  }
+}
+*/
 #pragma sightLoc modularFibEnd

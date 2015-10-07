@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+//#include <pthread.h>
+#include "sight.h"
+>>>>>>> old_sight/mergeHoaViz
 #include "sight_pthread.h"
 using namespace sight;
 #include <stdio.h>

@@ -50,7 +50,7 @@ trace::~trace() {
   
   assert(stream);
   delete(stream);
-  
+
   dbg.exitBlock();
   
   assert(tStack.size()>0);
@@ -187,7 +187,8 @@ traceObserverQueue::traceObserverQueue() {
 }
 
 traceObserverQueue::traceObserverQueue(const std::list<traceObserver*>& observersL)/* : queue(observersL)*/ {
-//cout << "traceObserverQueue::traceObserverQueue() #observersL.size="<<observersL.size()<<endl;
+
+cout << "traceObserverQueue::traceObserverQueue() #observersL.size="<<observersL.size()<<endl;
   // If observersL is non-empty
   if(observersL.size()>0) {
     firstO = observersL.front();
@@ -201,10 +202,10 @@ traceObserverQueue::traceObserverQueue(const std::list<traceObserver*>& observer
     // The traceObserver most recently encountered by the loop
     traceObserver* recentO=*o;
 
-//    cout << "  firstO="<<firstO<<", lastO="<<lastO<<", queue="<<this<<endl;
+    // cout << "  firstO="<<firstO<<", lastO="<<lastO<<", queue="<<this<<endl;
     
     for(o++; o!=observersL.end(); o++) {
-//      cout << "    traceObserverQueue recentO="<<recentO<<" <-- *o="<<*o<<endl;
+      // cout << "    traceObserverQueue recentO="<<recentO<<" <-- *o="<<*o<<endl;
       recentO->registerObserver(*o);
       recentO = *o;
     }
@@ -359,10 +360,8 @@ void traceObserverQueue::obsFinished() {
 externalTraceProcessor_File::externalTraceProcessor_File(std::string processorFName, std::string obsFName) : 
   processorFName(processorFName), obsFName(obsFName) 
 {
-  //cout << "processorFName="<<processorFName<<endl;
-  //cout << "obsFName="<<obsFName<<endl;
+
   traceFile.open(obsFName.c_str());
-  //cout << "traceFile.is_open()="<<traceFile.is_open()<<endl;
   finished = false;
 }
 
@@ -418,9 +417,10 @@ void externalTraceProcessor_File::obsFinished() {
   // Execute the processing application
   ostringstream s; 
   s << processorFName;
-  for(list<string>::iterator b=beforeParams.begin(); b!=beforeParams.end(); b++) s << " \""<<*b<<"\"";
-  s << " \""<<obsFName<<"\"";
-  for(list<string>::iterator a=afterParams.begin(); a!=afterParams.end(); a++) s << " \""<<*a<<"\"";
+
+  for(list<string>::iterator b=beforeParams.begin(); b!=beforeParams.end(); b++) s << " "<<*b;
+  s << " "<<obsFName;
+  for(list<string>::iterator a=afterParams.begin(); a!=afterParams.end(); a++) s << " "<<*a;
   //cout << "Command = "<<s.str()<<endl;
 
   // In case the processor executable is linked with Sight, unset the mutex environment variables from 
@@ -478,6 +478,7 @@ void externalTraceProcessor_File::obsFinished() {
   traceObserver::obsFinished();
 }
 
+
 /******************************
  ***** traceFileWriterTSV *****
  ******************************/
@@ -488,7 +489,7 @@ traceFileWriterTSV::traceFileWriterTSV(std::string outFName) {
   boost::system::error_code ec;
   if(!boost::filesystem::create_directory(p.parent_path(), ec)) { cerr << "traceFileWriterTSV::traceFileWriterTSV ERROR creating directory \""<<p.parent_path().string()<<"\"! "<<ec.message()<<endl; assert(0); }*/
   mkpath(outFName, 0755, false);
-  
+
   out.open(outFName.c_str(), std::ofstream::out);
   if(!out.is_open()) { cerr << "traceFileWriterTSV::traceFileWriterTSV() ERROR opening file \""<<outFName<<"\" for writing! "<<strerror(errno)<<endl; assert(0); }
   numObservations=0;
@@ -497,7 +498,8 @@ traceFileWriterTSV::traceFileWriterTSV(std::string outFName) {
 // Interface implemented by objects that listen for observations a traceStream reads. Such objects
 // call traceStream::registerObserver() to inform a given traceStream that it should observations.
 void traceFileWriterTSV::observe(int traceID,
-             const std::map<std::string, std::string>& ctxt, 
+
+             const std::map<std::string, std::string>& ctxt,
              const std::map<std::string, std::string>& obs,
              const std::map<std::string, anchor>&      obsAnchor) {
   /*cout << "traceFileWriterTSV::observe("<<traceID<<")"<<endl;
@@ -512,11 +514,11 @@ void traceFileWriterTSV::observe(int traceID,
   set<string> curCtxtKeys;
   for(map<string, string>::const_iterator i=ctxt.begin(); i!=ctxt.end(); i++)
     curCtxtKeys.insert(i->first);
-  
+
   set<string> curTraceKeys;
   for(map<string, string>::const_iterator i=obs.begin(); i!=obs.end(); i++)
     curTraceKeys.insert(i->first);
-    
+
   // Verify that all observations have the same context and trace keys
   if(numObservations==0) {
     ctxtKeys = curCtxtKeys;
@@ -525,7 +527,6 @@ void traceFileWriterTSV::observe(int traceID,
     if(ctxtKeys != curCtxtKeys)   { cerr << "traceFileWriterTSV::observe() ERROR: Inconsistent context keys. Previously observed "<<set2str(ctxtKeys)<<" but this observation has "<<set2str(curCtxtKeys)<<"!"; assert(0); }
     if(traceKeys != curTraceKeys) { cerr << "traceFileWriterTSV::observe() ERROR: Inconsistent trace keys. Previously observed "<<set2str(traceKeys)<<" but this observation has "<<set2str(curTraceKeys)<<"!"; assert(0); }
   }
-  
   // Print out the header line
   if(numObservations==0) {
     for(map<string, string>::const_iterator i=ctxt.begin(); i!=ctxt.end(); i++) {
@@ -539,7 +540,7 @@ void traceFileWriterTSV::observe(int traceID,
     }
     out << endl;
   }
-  
+
   // Print out the observation line
   for(map<string, string>::const_iterator i=ctxt.begin(); i!=ctxt.end(); i++) {
     if(i!=ctxt.begin()) out << "\t";
@@ -556,7 +557,7 @@ void traceFileWriterTSV::observe(int traceID,
   }
   out << endl;
   //cout << endl;
-  
+
   numObservations++;
 }
 
@@ -570,6 +571,7 @@ traceFileWriterTSV::~traceFileWriterTSV() {
   out.close();
 }
 
+
 /***********************
  ***** traceStream *****
  ***********************/
@@ -579,6 +581,7 @@ traceFileWriterTSV::~traceFileWriterTSV() {
 string traceStream::outDir="";
 // Relative to root of HTML document
 string traceStream::htmlOutDir="";
+
 
 // Maps the traceIDs of all the currently active traces to their trace objects
 std::map<int, traceStream*> traceStream::active;
@@ -647,6 +650,21 @@ traceStream::traceStream(properties::iterator props, std::string hostDiv, bool s
 
     dbg.includeWidgetScript("trace/trace.js", "text/javascript"); dbg.includeFile("trace/trace.js"); 
     
+    // hoa edit
+    dbg.includeWidgetScript("trace/cscp.js", "text/javascript"); dbg.includeFile("trace/cscp.js");
+    dbg.includeWidgetScript("trace/pcp/cscp.js", "text/javascript"); //dbg.includeFile("trace/pcp/cscp.js");
+    dbg.includeFile("trace/pcp");
+
+    dbg.includeWidgetScript("trace/lertjs/lert.js", "text/javascript"); //dbg.includeFile("trace/lertjs/lert.js");
+    dbg.includeWidgetScript("trace/lertjs/lert.css", "text/css"); //dbg.includeFile("trace/lertjs/lert.css");
+    dbg.includeFile("trace/lertjs");
+
+    // add new files
+    dbg.includeFile("trace/scatter3d.html");
+    dbg.includeFile("trace/web-export");
+    dbg.includeFile("trace/sketch.properties");
+    dbg.includeFile("trace/trace.pde");
+
     initialized = true;
   }
   
@@ -762,7 +780,66 @@ traceStream::~traceStream() {
 //      to them (false)
 // showLabels: boolean that indicates whether we should show a label that annotates a data plot (true) or whether
 //      we should just show the plot (false)
-std::string traceStream::getDisplayJSCmd(const std::list<std::string>& contextAttrs, const std::list<std::string>& traceAttrs,
+
+// hoa edit
+std::string traceStream::getDisplayJSCmd(const std::list<std::string>& contextAttrs, const std::list<std::string>& traceAttrs, std::string hostDiv, vizT viz, bool inwin, bool showFresh, bool showLabels, bool refreshView, std::string moduleName)
+{
+  // Default contextAttrs, traceAttrs, hostDiv and viz to be the values set within this traceStream
+  const std::list<std::string> *localContextAttrs = &contextAttrs,
+                               *localTraceAttrs   = &traceAttrs, *localVizList = &vizList;
+  if(contextAttrs.size()==0) localContextAttrs = &(this->contextAttrs);
+  if(traceAttrs.size()==0)   localTraceAttrs = &(this->traceAttrs);
+  if(hostDiv=="")            hostDiv = this->hostDiv;
+  //if(vizList.size()==0) localVizList = &(this->vizList);
+  if(viz == unknown)         viz = this->viz;
+
+  string ctxtAttrsStr = JSArray<list<string> >(*localContextAttrs);
+  string tracerAttrsStr = JSArray<list<string> >(*localTraceAttrs);
+  //string vizListStr = JSArray<list<string> >(*localVizList);
+
+  return txt()<<"displayTrace('"<<traceID<<"', "<<
+                             "'"<<hostDiv<<"', "<<
+                             ctxtAttrsStr<<", " <<
+                             tracerAttrsStr<<", "<<
+                             "'"<<viz2Str(viz)<<"', "<<
+                             (inwin?  "true":"false")<<", "<<
+                             (showFresh?  "true":"false")<<", "<<
+                             (showLabels? "true":"false")<<", "<<
+                             (refreshView?"true":"false")<<", "<<
+                              "'"<<moduleName<<"');";
+}
+// hoa's v1
+/*
+std::string traceStream::getDisplayJSCmd(const std::list<std::string>& contextAttrs, const std::list<std::string>& traceAttrs, std::string hostDiv, const std::list<std::string>& vizList, bool inwin, bool showFresh, bool showLabels, bool refreshView)
+{
+  // Default contextAttrs, traceAttrs, hostDiv and viz to be the values set within this traceStream
+  const std::list<std::string> *localContextAttrs = &contextAttrs,
+                               *localTraceAttrs   = &traceAttrs, *localVizList = &vizList;
+  if(contextAttrs.size()==0) localContextAttrs = &(this->contextAttrs);
+  if(traceAttrs.size()==0)   localTraceAttrs = &(this->traceAttrs);
+  if(hostDiv=="")            hostDiv = this->hostDiv;
+  if(vizList.size()==0) localVizList = &(this->vizList);
+  //if(viz == unknown)         viz = this->viz;
+
+  string ctxtAttrsStr = JSArray<list<string> >(*localContextAttrs);
+  string tracerAttrsStr = JSArray<list<string> >(*localTraceAttrs);
+  string vizListStr = JSArray<list<string> >(*localVizList);
+
+  return txt()<<"displayTrace('"<<traceID<<"', "<<
+                             "'"<<hostDiv<<"', "<<
+                             ctxtAttrsStr<<", " <<
+                             tracerAttrsStr<<", "<<
+                             vizListStr<<", "<<
+                             (inwin?  "true":"false")<<", "<<
+                             (showFresh?  "true":"false")<<", "<<
+                             (showLabels? "true":"false")<<", "<<
+                             (refreshView?"true":"false")<<");";
+}
+*/
+// Greg's
+/*
+ std::string traceStream::getDisplayJSCmd(const std::list<std::string>& contextAttrs, const std::list<std::string>& traceAttrs,
+>>>>>>> old_sight/mergeHoaViz
                                          std::string hostDiv, vizT viz, bool showFresh, bool showLabels, bool refreshView) {
   // Default contextAttrs, traceAttrs, hostDiv and viz to be the values set within this traceStream
   const std::list<std::string> *localContextAttrs = &contextAttrs,
@@ -784,7 +861,7 @@ std::string traceStream::getDisplayJSCmd(const std::list<std::string>& contextAt
                              (showLabels? "true":"false")<<", "<<
                              (refreshView?"true":"false")<<");";
 }
-
+*/
 // Record an observation
 void* traceStream::observe(properties::iterator props)
 {
@@ -834,10 +911,10 @@ void traceStream::observe(int fromTraceID,
 {
   //cout << "traceStream::observe("<<fromTraceID<<") this="<<this<<", this->traceID="<<this->traceID<<", #contextAttrs="<<contextAttrs.size()<<" #ctxt="<<ctxt.size()<<", #obs="<<obs.size()<<endl;
   
-/*  // Read all the context attributes. If contextAttrs is empty, it is filled with the context attributes of 
+
+  // Read all the context attributes. If contextAttrs is empty, it is filled with the context attributes of 
   // this observation. Otherwise, we verify that this observation's context is identical to prior observations.
   if(contextAttrsInitialized) assert(contextAttrs.size() == ctxt.size());
-
   //for(long i=0; i<numCtxtAttrs; i++) {
   for(map<string, string>::const_iterator c=ctxt.begin(); c!=ctxt.end(); c++) {
     //string ctxtName = properties::get(props, txt()<<"cKey_"<<i);
@@ -852,19 +929,7 @@ void traceStream::observe(int fromTraceID,
       assert(contextAttrsSet.find(ctxtName) != contextAttrsSet.end());
   }
   // The context attributes of this trace are now definitely initialized
-  contextAttrsInitialized = true;*/
 
-  // Update contextAttrs and contextAttrsSet with any context attributes that were not previously observed
-  for(map<string, string>::const_iterator c=ctxt.begin(); c!=ctxt.end(); c++) {
-    string ctxtName = c->first;
-    set<string>::iterator i=contextAttrsSet.find(ctxtName);
-    // If this is a new context attribute, add it to contextAttrs and contextAttrsSet
-    if(i==contextAttrsSet.end()) {
-      contextAttrs.push_back(ctxtName);
-      contextAttrsSet.insert(ctxtName);
-    }
-  }
-  // The context attributes of this trace are now definitely initialized
   contextAttrsInitialized = true;
   
   // Read all the trace attributes. If traceAttrs is empty, it is filled with the trace attributes of 

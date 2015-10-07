@@ -2870,30 +2870,30 @@ int main(int argc, char *argv[])
 #endif
                    getMeasures());*/
 
-   InitMeshDecomp(numRanks, myRank, &col, &row, &plane, &side);
+     InitMeshDecomp(numRanks, myRank, &col, &row, &plane, &side);
 
-   // Build the main data structure and initialize it
-   //std::cout << "dtfixed="<<opts.dtfixed<<", dtcourant="<<opts.dtcourant<<", dthydro="<<opts.dthydro<<"\n";
-   locDom = new Domain(numRanks, col, row, plane, opts.nx,
-                       side, opts.numReg, opts.balance, opts.cost,
-                       opts.dtfixed, opts.dthydro, opts.dtcourant, opts.dtmax) ;
-   //std::cout << "dtfixed="<<locDom->dtfixed()<<", dtcourant="<<locDom->dtcourant()<<", dthydro="<<locDom->dthydro()<<"\n";
+     // Build the main data structure and initialize it
+     //std::cout << "dtfixed="<<opts.dtfixed<<", dtcourant="<<opts.dtcourant<<", dthydro="<<opts.dthydro<<"\n";
+     locDom = new Domain(numRanks, col, row, plane, opts.nx,
+                         side, opts.numReg, opts.balance, opts.cost,
+                         opts.dtfixed, opts.dthydro, opts.dtcourant, opts.dtmax) ;
+     //std::cout << "dtfixed="<<locDom->dtfixed()<<", dtcourant="<<locDom->dtcourant()<<", dthydro="<<locDom->dthydro()<<"\n";
 
-#if USE_MPI   
-   fieldData = &Domain::nodalMass ;
+      #if USE_MPI   
+       fieldData = &Domain::nodalMass ;
 
-   // Initial domain boundary communication 
-   CommRecv(*locDom, MSG_COMM_SBN, 1,
-            locDom->sizeX() + 1, locDom->sizeY() + 1, locDom->sizeZ() + 1,
-            true, false) ;
-   CommSend(*locDom, MSG_COMM_SBN, 1, &fieldData,
-            locDom->sizeX() + 1, locDom->sizeY() + 1, locDom->sizeZ() +  1,
-            true, false) ;
-   CommSBN(*locDom, 1, &fieldData) ;
+       // Initial domain boundary communication 
+       CommRecv(*locDom, MSG_COMM_SBN, 1,
+                locDom->sizeX() + 1, locDom->sizeY() + 1, locDom->sizeZ() + 1,
+                true, false) ;
+       CommSend(*locDom, MSG_COMM_SBN, 1, &fieldData,
+                locDom->sizeX() + 1, locDom->sizeY() + 1, locDom->sizeZ() +  1,
+                true, false) ;
+       CommSBN(*locDom, 1, &fieldData) ;
 
-   // End initialization
-   MPI_Barrier(MPI_COMM_WORLD);
-#endif   
+       // End initialization
+       MPI_Barrier(MPI_COMM_WORLD);
+    #endif   
    }
    
    // BEGIN timestep to solution */

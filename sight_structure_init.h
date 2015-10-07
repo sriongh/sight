@@ -46,7 +46,6 @@ class ThreadInitFinInstantiator : public sight::common::LoadTimeRegistry {
     ThreadFinalizer   fin;
     set<std::string> mustFollow;
     set<std::string> mustPrecede;
-
     threadFuncs(ThreadInitializer init, ThreadFinalizer fin,
                 const set<std::string>& mustFollow, const set<std::string>& mustPrecede) :
               UID((*maxUID)++), init(init), fin(fin), mustFollow(mustFollow), mustPrecede(mustPrecede) {}

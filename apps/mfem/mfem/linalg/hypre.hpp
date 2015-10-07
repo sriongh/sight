@@ -20,6 +20,13 @@
 #include "_hypre_parcsr_mv.h"
 #include "_hypre_parcsr_ls.h"
 
+<<<<<<< HEAD
+=======
+#include "dbglog.h"
+using namespace dbglog;
+
+
+>>>>>>> old_sight/mergeHoaViz
 /// Wrapper for hypre's parallel vector class
 class HypreParVector : public Vector
 {

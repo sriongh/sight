@@ -1,8 +1,18 @@
+<<<<<<< HEAD
 #include "sight_pthread.h"
 using namespace sight;
 #include <stdio.h>
 #include <stdlib.h>
 
+=======
+//#include <pthread.h>
+#include "sight.h"
+#include "sight_pthread.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace sight;
+>>>>>>> old_sight/mergeHoaViz
 /*   
 The following structure contains the necessary information  
 to allow the function "dotprod" to access its input data and 
@@ -67,8 +77,14 @@ void *dotprod(void *arg)
    structure, and unlock it upon updating.
    */
    pthread_mutex_lock (&mutexsum);
+<<<<<<< HEAD
    {scope s("Updating dotstr.sum", scope::minimum);
    dotstr.sum += mysum;
+=======
+   {
+      scope s("Updating dotstr.sum", scope::minimum);
+      dotstr.sum += mysum;
+>>>>>>> old_sight/mergeHoaViz
    }
    pthread_mutex_unlock (&mutexsum);
    

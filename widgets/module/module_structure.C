@@ -96,7 +96,7 @@ ModuleThreadInitFinInstantiator::ModuleThreadInitFinInstantiator() {
            ModuleThreadInitFinInstantiator::initialize,
            ModuleThreadInitFinInstantiator::finalize,
            /*mustFollow*/ common::easyset<std::string>(),
-           /*mustPrecede*/  common::easyset<std::string>("mpi", "pthread"));
+           /*mustPrecede*/  common::easyset<std::string>("mpi", "pthread", "ompthread"));
 }
 
 void ModuleThreadInitFinInstantiator::initialize() {
@@ -125,6 +125,9 @@ instance::instance(properties::iterator props) {
   name       = properties::get(props, "name");
   numInputs  = properties::getInt(props, "numInputs");
   numOutputs = properties::getInt(props, "numOutputs");
+  // hoa edit
+  vertID = properties::getInt(props, "vertID");
+  horiID = properties::getInt(props, "horiID");
 }
 
 // Returns the properties map that describes this group object;
@@ -132,13 +135,18 @@ std::map<std::string, std::string> instance::getProperties() const {
   map<string, string> pMap;
   pMap["name"]       = name;
   pMap["numInputs"]  = txt()<<numInputs;
-  pMap["numOutputs"] = txt()<<numOutputs;  
+  pMap["numOutputs"] = txt()<<numOutputs;
+  // hoa edit
+  pMap["vertID"]  = txt()<<vertID;
+  pMap["horiID"]  = txt()<<horiID;
+  
   return pMap;
 }
 
+// hoa edit
 // Returns a human-readable string that describes this context
 std::string instance::str() const {
-  return txt()<<"[instance "<<name<<", #inputs="<<numInputs<<", #outputs="<<numOutputs<<"]";
+  return txt()<<"[instance "<<name<<", #inputs="<<numInputs<<", #outputs="<<numOutputs << ", #vertID="<<vertID <<", #horiID="<<horiID << "]" ;
 }
 
 /*****************
@@ -176,6 +184,17 @@ int group::numInputs() const {
 int group::numOutputs() const {
   assert(stack.size()>0);
   return stack.back().numOutputs;
+}
+
+// hoa edit
+int group::vertID() const {
+  assert(stack.size()>0);
+  return stack.back().vertID;
+}
+
+int group::horiID() const {
+  assert(stack.size()>0);
+  return stack.back().horiID;
 }
 
 // Returns the most deeply nested instance within this group
@@ -920,6 +939,9 @@ properties* module::setProperties(const instance& inst, properties* props, const
     pMap["name"]       = g.name();
     pMap["numInputs"]  = txt()<<g.numInputs();
     pMap["numOutputs"] = txt()<<g.numOutputs();
+    // hoa edit
+    pMap["vertID"] = txt()<<g.vertID();
+    pMap["horiID"] = txt()<<g.horiID();
 
     // If this is an instance of module rather than a class that derives from module
     //if(modularApp::isInstanceActive() && !isDerived) {
@@ -961,6 +983,10 @@ void module::init(const std::vector<port>& ins, properties* derivedProps) {
     pMap["name"]       = g.name();
     pMap["numInputs"]  = txt()<<g.numInputs();
     pMap["numOutputs"] = txt()<<g.numOutputs();
+    // hoa edit
+    pMap["vertID"] = txt()<<g.vertID();
+    pMap["horiID"] = txt()<<g.horiID();
+
     derivedProps->add("module", pMap);
     
     // Add this module instance to the current stack of modules
@@ -1344,7 +1370,7 @@ std::string compContext::str() const {
 
 /**************************
  ***** compModularApp *****
- ************************** /
+ **************************/
 
 compModularApp::compModularApp(const std::string& appName,                                                       properties* props) : 
   modularApp(appName,                                   props)
@@ -1375,7 +1401,6 @@ void compModularApp::destroy() {
 compModularApp::~compModularApp() {
   assert(!destroyed);
 }
-*/
 
 /**********************
  ***** compModule *****
@@ -1615,21 +1640,23 @@ attrValue compModule::getModOption(std::string name) {
  ***** springModularApp  *****
  *****************************/
 
-/*springModularApp::springModularApp(const std::string& appName,                                                        properties* props) :
-    modularApp(appName, props)
+/*
+springModularApp::springModularApp(const std::string& appName,                                                        properties* props) :
+    compModularApp(appName, props)
 { init(); }
 
 springModularApp::springModularApp(const std::string& appName, const attrOp& onoffOp,                                 properties* props)  :
-    modularApp(appName, props)
+    compModularApp(appName, props)
 { init(); }
 
 springModularApp::springModularApp(const std::string& appName,                        const compNamedMeasures& cMeas, properties* props) :
-    modularApp(appName, props)
+    compModularApp(appName, props)
 { init(); }
 
 springModularApp::springModularApp(const std::string& appName, const attrOp& onoffOp, const compNamedMeasures& cMeas, properties* props)  :
-    modularApp(appName, props)
-{ init(); }*/
+    compModularApp(appName, props)
+{ init(); }
+*/
 
 springModularApp* springModularApp::instance=NULL;
 
@@ -1697,7 +1724,8 @@ long long randomLL() {
 }
 
 void springModularApp::init() {
-  //if(!props->active) return;
+
+  // if(!props->active) return;
   
   bufSize=0;
   if(getenv("SPRING_BUF_SIZE"))
@@ -1739,24 +1767,25 @@ void springModularApp::init() {
 // of inheritance above sightObj, each object must enable Sight to directly call its destructor by calling
 // it inside the destroy() method. The fact that this method is virtual ensures that calling destroy() on 
 // an object will invoke the destroy() method of the most-derived class.
-/*void springModularApp::destroy() {
-  this->~springModularApp();
-}
 
-springModularApp::~springModularApp() {
-  assert(!destroyed);
+// void springModularApp::destroy() {
+//   this->~springModularApp();
+// }
+
+// springModularApp::~springModularApp() {
+//   assert(!destroyed);
   
-  if(props->active && bufSize>sizeof(long long)) {
-    int ret = pthread_cancel(interfThread);
-    if(ret!=0) { cerr << "ERROR: return code from pthread_cancel() is "<<ret<<", thread %d\n"; assert(0); }
+//   if(props->active && bufSize>sizeof(long long)) {
+//     int ret = pthread_cancel(interfThread);
+//     if(ret!=0) { cerr << "ERROR: return code from pthread_cancel() is "<<ret<<", thread %d\n"; assert(0); }
     
-    int status;
-    ret = pthread_join(interfThread, (void **)&status); 
-    if(ret!=0) { cerr << "ERROR: return code from pthread_join() is "<<ret<<", thread %d\n"; assert(0); }
+//     int status;
+//     ret = pthread_join(interfThread, (void **)&status); 
+//     if(ret!=0) { cerr << "ERROR: return code from pthread_join() is "<<ret<<", thread %d\n"; assert(0); }
    
-    delete data;
-  }
-}*/
+//     delete data;
+//   }
+// }
 
 /************************
  ***** springModule *****
@@ -1933,6 +1962,8 @@ properties* moduleTraceStream::setProperties(int moduleID, module* m, vizT viz, 
     pMap["name"]       = m->name();
     pMap["numInputs"]  = txt()<<m->numInputs();
     pMap["numOutputs"] = txt()<<m->numOutputs();
+    pMap["vertID"] = txt()<<m->vertID();
+    pMap["horiID"] = txt()<<m->horiID();
     props->add("moduleTS", pMap);
   }
   
@@ -2354,10 +2385,14 @@ properties* ModuleMerger::setProperties(std::vector<std::pair<properties::tagTyp
     
     pMap["name"]       = getSameValue(tags, "name");
     pMap["numInputs"]  = getSameValue(tags, "numInputs");
-    pMap["numOutputs"] = getSameValue(tags, "numOutputs");
+
+    pMap["numOutputs"] = getSameValue(tags, "numOutputs"); 
+    // hoa edit
+    pMap["vertID"] = getSameValue(tags, "vertID");
+    pMap["horiID"] = getSameValue(tags, "horiID");
 
     group g = msr->enterModule(
-                           instance(pMap["name"], attrValue::parseInt(pMap["numInputs"]), attrValue::parseInt(pMap["numOutputs"])));
+                           instance(pMap["name"], attrValue::parseInt(pMap["numInputs"]), attrValue::parseInt(pMap["numOutputs"]),attrValue::parseInt(pMap["vertID"]), attrValue::parseInt(pMap["horiID"]) ));
 
     // If this is a module tag, which is placed at the end of the modularApp and records information
     // about the module's execution
@@ -2430,6 +2465,10 @@ void ModuleMerger::mergeKey(properties::tagType type, properties::iterator tag,
       info.add(tag.get("name"));
       info.add(tag.get("numInputs"));
       info.add(tag.get("numOutputs"));
+
+      // hoa edit
+      info.add(tag.get("vertID"));
+      info.add(tag.get("horiID"));
     /*} else if(tag.name() == "module") {
       streamID inSID(properties::getInt(tag, "moduleID"), inStreamRecords["module"]->getVariantID());
       //streamID outSID = ((ModuleStreamRecord*)inStreamRecords["module"])->mStack.back()->in2outID(inSID);
@@ -2780,6 +2819,10 @@ properties* ModuleTraceStreamMerger::setProperties(
     pMap["numInputs"] = getSameValue(tags, "numInputs");
     pMap["numOutputs"] = getSameValue(tags, "numOutputs");
 
+    // hoa edit
+    pMap["vertID"] = getSameValue(tags, "vertID");
+    pMap["horiID"] = getSameValue(tags, "horiID");
+
 //dbg << "ModuleTraceStreamMerger outStreamRecords="<<&ModularAppMerger::getModuleOutStreamRecords()<<endl;
 
     ModuleStreamRecord* globalMSR = ModularAppMerger::getMSR();
@@ -2859,6 +2902,10 @@ void ModuleTraceStreamMerger::mergeKey(properties::tagType type, properties::ite
     info.add(tag.get("name"));
     info.add(tag.get("numInputs"));
     info.add(tag.get("numOutputs"));
+
+    // hoa edit
+    info.add(tag.get("vertID"));
+    info.add(tag.get("horiID"));
   }
 
   // module traceStreams need to be interleaved in the merged output rather than aligned.

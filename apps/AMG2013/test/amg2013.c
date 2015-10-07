@@ -1851,13 +1851,27 @@ main( int   argc,
    }
    attr myidAttr("MPIrank", 0/*myid*/);
    
+<<<<<<< HEAD
    sightModularApp AMGApp("AMG", namedMeasures("timestamp", new timeStampMeasure(),
+=======
+<<<<<<< HEAD
+   // hoa edit
+   
+   sightModularApp AMGApp("AMG", namedMeasures(//"timestamp", new timeStampMeasure(),
+=======
+   sightModularApp AMGApp("AMG", namedMeasures("timestamp", new timeStampMeasure(),
+>>>>>>> gbDevelop
+>>>>>>> old_sight/mergeHoaViz
 #ifdef RAPL
                                                "RAPL", new RAPLMeasure()
 #else
                                                "time", new timeMeasure()
 #endif
                          ));
+<<<<<<< HEAD
+=======
+  
+>>>>>>> old_sight/mergeHoaViz
    
    if (build_matrix_type > 1 && build_matrix_type < 8)
    {

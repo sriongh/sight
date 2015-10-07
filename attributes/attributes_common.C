@@ -1794,10 +1794,6 @@ customAttrValue* sightVectorField::deserialize(std::string serialized) {
 bool sparserMesh(int basisS, int originS, int sizeS, 
                  int basisD, int originD, int sizeD) {
   
-  /*cout << "labs("<<basisD<<") < labs("<<basisS<<")="<<(labs(basisD) < labs(basisS))<<endl;
-  cout << "labs("<<basisS<<") % labs("<<basisD<<")="<<(labs(basisS) % labs(basisD))<<endl;
-  cout << "labs((("<<originS<<" - "<<originD<<") % "<<basisD<<"))="<<(((originS - originD) % basisD))<<endl;*/
-
   return 
       // The spacing of basisD is finer than the spacing of basisS
          labs(basisD) < labs(basisS) &&
@@ -1808,6 +1804,9 @@ bool sparserMesh(int basisS, int originS, int sizeS,
       // And all the points in the span of basisS fit on the span of basisD
          (originS + basisS * (sizeS)) <= (originD + basisD * (sizeD));
   // ??? (originS + basisS * (sizeS+1)) <= (originD + basisD * (sizeD+1));
+// =======
+//          (originS + basisS * (sizeS+1)) <= (originD + basisD * (sizeD+1));
+// >>>>>>> old_sight/mergeHoaViz
 }
 
 // Returns whether a 1-dimensional regular Mesh 1 is identical to Mesh 2.

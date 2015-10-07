@@ -7,6 +7,11 @@
 * AUTHOR: Blaise Barney
 * LAST REVISED: 01/29/09
 ******************************************************************************/
+<<<<<<< HEAD
+=======
+#include <pthread.h>
+#include "sight.h"
+>>>>>>> old_sight/mergeHoaViz
 #include "sight_pthread.h"
 using namespace sight;
 #include <stdio.h>
