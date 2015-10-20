@@ -226,9 +226,9 @@ int *dijkstra_distance ( int ohd[NV][NV]  )
   {
     if(omp_get_thread_num() != 0){
       sightOMPThreadInitializer();    
-      // for(int i=1; i<omp_get_num_threads(); i++){
-      //   g.addNode(txt()<<i,0,i);  
-      // }
+      for(int i=1; i<omp_get_num_threads(); i++){
+        g.addNode(txt()<<i,0,i);  
+      }
     }
     else
       dbg << "Master Thread start" << endl;
@@ -251,7 +251,7 @@ int *dijkstra_distance ( int ohd[NV][NV]  )
 
     int forID = 1;
     int N = 100;
-    //g.addNode(txt()<<"For_"<<omp_get_thread_num(), txt()<<omp_get_thread_num(), 1, omp_get_thread_num());        
+    g.addNode(txt()<<"For_"<<omp_get_thread_num(), txt()<<omp_get_thread_num(), 1, omp_get_thread_num());        
     #pragma omp for
     for (i=0; i<N; i++)
     {
@@ -299,12 +299,13 @@ int *dijkstra_distance ( int ohd[NV][NV]  )
         dbg << "md = " << md << endl;
         dbg << "mv = " << mv << endl;  
         
-        //g.addNode(txt()<<"single_"<<omp_get_thread_num()<<"_"<<my_step, txt()<<omp_get_thread_num(), (my_step-1)*4+2, omp_get_thread_num(), sAnchor);
+        g.addNode(txt()<<"single_"<<omp_get_thread_num()<<"_"<<my_step, txt()<<omp_get_thread_num(), (my_step-1)*4+2, omp_get_thread_num(), sAnchor);
         
-        for(int i = 1; i<omp_get_num_threads(); i++){
-          //if(i!= omp_get_thread_num())
-            //g.addNode(txt()<<"wait_single_"<<i<<"_"<<my_step, txt()<<i, (my_step-1)*4+2, i, sAnchor); 
-        }
+        // hoa tam
+        // for(int i = 1; i<omp_get_num_threads(); i++){
+        //   if(i!= omp_get_thread_num())
+        //     g.addNode(txt()<<"wait_single_"<<i<<"_"<<my_step, txt()<<i, (my_step-1)*4+2, i, sAnchor); 
+        // }
  
         for(int i=1; i<omp_get_num_threads(); i++)
           if(i!= omp_get_thread_num())
@@ -341,7 +342,7 @@ int *dijkstra_distance ( int ohd[NV][NV]  )
             dbg << "md = " << md << endl;
             dbg << "mv = " << mv << endl; 
              
-            //g.addNode(txt()<<"critical_"<<omp_get_thread_num()<<"_"<<my_step, txt()<<omp_get_thread_num(), (my_step-1)*4+3, omp_get_thread_num(), sAnchor);
+            g.addNode(txt()<<"critical_"<<omp_get_thread_num()<<"_"<<my_step, txt()<<omp_get_thread_num(), (my_step-1)*4+3, omp_get_thread_num(), sAnchor);
              
           }
         if(omp_get_thread_num() !=0 )
@@ -365,7 +366,7 @@ int *dijkstra_distance ( int ohd[NV][NV]  )
         */
         if(omp_get_thread_num() !=0 )
          sight_omp_barrier_wait(&ompbarrier);   
-        //g.addNode(txt()<<"barrier_"<<omp_get_thread_num()<<"_"<<my_step, txt()<<omp_get_thread_num(), (my_step-1)*4+4, omp_get_thread_num());
+        g.addNode(txt()<<"barrier_"<<omp_get_thread_num()<<"_"<<my_step, txt()<<omp_get_thread_num(), (my_step-1)*4+4, omp_get_thread_num());
       }
       
 /*
@@ -439,6 +440,7 @@ int *dijkstra_distance ( int ohd[NV][NV]  )
     
     # pragma omp single
     {  
+      // hoa tam
       //g.addNode(txt()<<"Thread "<<omp_get_thread_num()<<" single "<<my_step+3, txt()<<omp_get_thread_num());    
           
       {
@@ -462,7 +464,7 @@ int *dijkstra_distance ( int ohd[NV][NV]  )
     sight_omp_receive_single(singleThread);
 
 
-    //g.addNode(txt()<<"End_"<<omp_get_thread_num(), txt()<<omp_get_thread_num(), (my_step-1)*4+5, omp_get_thread_num());        
+    g.addNode(txt()<<"End_"<<omp_get_thread_num(), txt()<<omp_get_thread_num(), (my_step-1)*4+5, omp_get_thread_num());        
     
     {
       scope s("End thread", scope::minimum);
