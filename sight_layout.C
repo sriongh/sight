@@ -741,7 +741,8 @@ block::block(properties::iterator props) : sightObj(props.next()), startA(/*fals
     par = -1;
   int bID = blockIDFromStructure-1;
 
-  tFile << bID << ":" << bID<<"_"<<label << ":0:0:" << par << endl;
+  if(bID >= 0)
+    tFile << bID << ":" << bID<<"_"<<label << ":0:0:" << par << endl;
   tFile.close();
 
   ostringstream linkFName;
