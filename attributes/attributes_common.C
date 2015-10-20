@@ -103,12 +103,6 @@ attrValue::attrValue(int intV) {
 //cout << this << ": allocated "<<((long*)store)<<"\n";
 }
 
-attrValue::attrValue(long intV) {
-  type  = intT;
-  store = new long;
-  *((long*)store) = intV;
-//cout << this << ": allocated "<<((long*)store)<<"\n";
-}
 
 attrValue::attrValue(float floatV) {
   type  = floatT;
@@ -116,11 +110,6 @@ attrValue::attrValue(float floatV) {
   *((double*)store) = floatV;
 }
 
-attrValue::attrValue(double floatV) {
-  type  = floatT;
-  store = new double;
-  *((double*)store) = floatV;
-}
 
 // Produces a customSerT type
 attrValue::attrValue(const customAttrValue& customV) {
