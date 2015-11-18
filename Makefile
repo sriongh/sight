@@ -8,34 +8,41 @@ sight := ${sight_O} ${sight_H} gdbLineNum.pl sightDefines.pl
 
 ROOT_PATH = ${CURDIR}
 
+# Set whether we'll use callpaths to help align different blocks more accurately during merging.
+CALLPATH_ENABLED=0
+
 SIGHT_CFLAGS = -g -fPIC -I${ROOT_PATH} -I${ROOT_PATH}/widgets -I${ROOT_PATH}/attributes -I${ROOT_PATH}/widgets/parallel \
                 -I${ROOT_PATH}/tools/callpath/src -I${ROOT_PATH}/tools/adept-utils/include \
                 -I${ROOT_PATH}/tools/boost_1_55_0 \
-                -I${ROOT_PATH}/widgets/papi/include 
+                -I${ROOT_PATH}/widgets/papi/include \
+		-DCALLPATH_ENABLED=${CALLPATH_ENABLED}
 
 SIGHT_LINKFLAGS = \
                   -Wl,-rpath ${ROOT_PATH} \
-                  ${ROOT_PATH}/tools/adept-utils/lib/libadept_cutils.so \
-                  ${ROOT_PATH}/tools/adept-utils/lib/libadept_timing.so \
-                  ${ROOT_PATH}/tools/adept-utils/lib/libadept_utils.so \
-                  -Wl,-rpath ${ROOT_PATH}/tools/adept-utils/lib \
-                  ${ROOT_PATH}/tools/callpath/src/src/libcallpath.so \
-                  -Wl,-rpath ${ROOT_PATH}/tools/callpath/src/src \
                   ${ROOT_PATH}/widgets/papi/lib/libpapi.a \
                   ${ROOT_PATH}/widgets/gsl/lib/libgsl.so \
                   ${ROOT_PATH}/widgets/gsl/lib/libgslcblas.so \
                   -Wl,-rpath ${ROOT_PATH}/widgets/gsl/lib \
 	          -lpthread
 
-RAPL_ENABLED = 1
+ifeq (${CALLPATH_ENABLED}, 1)
+SIGHT_LINKFLAGS += ${ROOT_PATH}/tools/adept-utils/lib/libadept_cutils.so \
+                  ${ROOT_PATH}/tools/adept-utils/lib/libadept_timing.so \
+                  ${ROOT_PATH}/tools/adept-utils/lib/libadept_utils.so \
+                  -Wl,-rpath ${ROOT_PATH}/tools/adept-utils/lib \
+                  ${ROOT_PATH}/tools/callpath/src/src/libcallpath.so \
+                  -Wl,-rpath ${ROOT_PATH}/tools/callpath/src/src
+endif
+
+RAPL_ENABLED = 0
 ifeq (${RAPL_ENABLED}, 1)
 SIGHT_CFLAGS += -I${ROOT_PATH}/widgets/libmsr/include
 SIGHT_LINKFLAGS += ${ROOT_PATH}/widgets/libmsr/lib/libmsr.so \
                     -Wl,-rpath ${ROOT_PATH}/widgets/libmsr/lib
 endif
 	                
-override CC=icc#clang #icc #gcc
-override CCC=icpc#clang++ #icpc #clang++ #g++
+override CC=gcc
+override CCC=g++
 MPICC = mpi${CC}
 MPICCC = mpi${CCC} #${ROOT_PATH}/tools/mpi${CCC}
 
@@ -61,8 +68,7 @@ REMOTE_ENABLED := 0
 else
 # Default distribution disables remote access since this capability requires us to run a web server
 # and many compute centers disallow this
-REMOTE_ENABLED := 1
-#REMOTE_ENABLED := 0
+REMOTE_ENABLED := 0
 endif
 
 ifneq (${OS}, Cygwin)
@@ -91,7 +97,7 @@ ifeq (${KULFI_ENABLED}, 1)
 LLVM32_SRC_PATH := /g/g15/bronevet/apps/llvm-3.2
 LLVM32_BUILD_PATH := /g/g15/bronevet/apps/llvm-3.2-build
 LLVM32_INSTALL_PATH := /g/g15/bronevet/apps/llvm
-	
+
 $(info Setting compiler to be the same LLVM Clang as KULFI, from path ${LLVM32_INSTALL_PATH})
 CC = ${LLVM32_INSTALL_PATH}/bin/clang
 CCC = ${LLVM32_INSTALL_PATH}/bin/clang++
@@ -99,7 +105,7 @@ MPICC = ${ROOT_PATH}/tools/mpiclang
 MPICCC = ${ROOT_PATH}/tools/mpiclang++
 endif
 
-MAKE_DEFINES = ROOT_PATH=${ROOT_PATH} RAPL_ENABLED=${RAPL_ENABLED} REMOTE_ENABLED=${REMOTE_ENABLED} GDB_PORT=${GDB_PORT} VNC_ENABLED=${VNC_ENABLED} MPI_ENABLED=${MPI_ENABLED} OS=${OS} SIGHT_CFLAGS="${SIGHT_CFLAGS}" SIGHT_LINKFLAGS="${SIGHT_LINKFLAGS}" CC=${CC} CCC=${CCC} KULFI_ENABLED=${KULFI_ENABLED} LLVM32_SRC_PATH=${LLVM32_SRC_PATH} LLVM32_BUILD_PATH=${LLVM32_BUILD_PATH} LLVM32_INSTALL_PATH=${LLVM32_INSTALL_PATH}
+MAKE_DEFINES = ROOT_PATH=${ROOT_PATH} RAPL_ENABLED=${RAPL_ENABLED} REMOTE_ENABLED=${REMOTE_ENABLED} GDB_PORT=${GDB_PORT} VNC_ENABLED=${VNC_ENABLED} MPI_ENABLED=${MPI_ENABLED} CALLPATH_ENABLED=${CALLPATH_ENABLED} OS=${OS} SIGHT_CFLAGS="${SIGHT_CFLAGS}" SIGHT_LINKFLAGS="${SIGHT_LINKFLAGS}" CC=${CC} CCC=${CCC} KULFI_ENABLED=${KULFI_ENABLED} LLVM32_SRC_PATH=${LLVM32_SRC_PATH} LLVM32_BUILD_PATH=${LLVM32_BUILD_PATH} LLVM32_INSTALL_PATH=${LLVM32_INSTALL_PATH}
 
 # Set to "!" if we wish to enable examples that use MPI
 #MPI_ENABLED = 0
@@ -158,7 +164,7 @@ endif
 slayout.o: slayout.C process.C process.h
 	${CCC} ${SIGHT_CFLAGS} slayout.C -I. -c -o slayout.o
 
-slayout${EXE}: mfem libsight_layout.so widgets_post
+slayout${EXE}: libsight_layout.so widgets_post #mfem
 	${CCC} -Wl,-rpath ${ROOT_PATH} -Wl,--whole-archive libsight_layout.so apps/mfem/mfem_layout.o -Wl,-no-whole-archive -o slayout${EXE}
 #slayout${EXE}: mfem libsight_layout.so
 #	${CCC} libsight_layout.so -Wl,-rpath ${ROOT_PATH} -Wl,-rpath ${ROOT_PATH}/widgets/gsl/lib -Lwidgets/gsl/lib -lgsl -lgslcblas apps/mfem/mfem_layout.o -o slayout${EXE}

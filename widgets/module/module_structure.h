@@ -12,7 +12,9 @@
 #include "module_common.h"
 #include "../../sight_structure_internal.h"
 #include "../trace/trace_structure.h"
+#if (CALLPATH_ENABLED==1)
 #include "Callpath.h"
+#endif
 #include <pthread.h>
 
 namespace sight {

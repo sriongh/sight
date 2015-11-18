@@ -9,7 +9,9 @@
 #include <sstream>
 #include <fstream>
 #include "../../sight_structure_internal.h"
+#if (CALLPATH_ENABLED==1)
 #include "Callpath.h"
+#endif
 
 namespace sight {
 namespace structure {

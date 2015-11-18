@@ -13,8 +13,10 @@
 #include <assert.h>
 #include "sight_common.h"
 #include "utils.h"
+#if (CALLPATH_ENABLED==1)
 #include "tools/callpath/include/Callpath.h"
 #include "tools/callpath/include/CallpathRuntime.h"
+#endif  // CALLPATH_ENABLED
 #include "thread_local_storage.h"
 #include <signal.h>
 
@@ -185,11 +187,13 @@ class streamID {
   { return txt()<<"[streamID: vID="<<vID.serialize()<<", ID="<<ID<<"]"; }
 }; // class streamID
 
+#if (CALLPATH_ENABLED==1)
 // Support for call paths
 extern ThreadLocalStorage0<CallpathRuntime> CPRuntime;
 std::string cp2str(const Callpath& cp);
 
 //Callpath str2cp(std::string str);
+#endif  // CALLPATH_ENABLED
 
 // Represents a unique location in the sight output
 class location : printable {

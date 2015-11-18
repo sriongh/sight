@@ -352,6 +352,12 @@ void SightInit_internal(int argc, char** argv, string title, string workDir, boo
   isMainThread = mainThread;
   
   loadSightConfig(configFileEnvVars("SIGHT_STRUCTURE_CONFIG", "SIGHT_CONFIG"));
+ 
+  // Register AbortHandlerInstantiator::appExited to be called when the application calls exit.
+  // This must be done here since this method is called within main(), after all
+  // the global vars have been initialized. This means that when appExited() is
+  // called, none of them will have been destroyed yet.
+  atexit(AbortHandlerInstantiator::appExited);
   
   // If this is the main thread, set the Sight properties to be used for serialization
   if(mainThread) {
@@ -605,7 +611,7 @@ void NullSightInit(int argc, char** argv, std::string title, std::string workDir
 /**********************
  ***** Call Paths *****
  **********************/
-
+#if (CALLPATH_ENABLED==1)
 ThreadLocalStorage0<CallpathRuntime> CPRuntime;
 string cp2str(const Callpath& cp) {
   ostringstream s;
@@ -621,7 +627,7 @@ string cp2str(const Callpath& cp) {
   istringstream s(str);
   return Callpath::read_in(s);
 }*/
-
+#endif // CALLPATH_ENABLED
 /********************
  ***** location *****
  ********************/
@@ -1619,7 +1625,11 @@ void anchor::link(string text) const {
   newProps["anchorID"] = txt()<<anchorID;
   newProps["text"] = text;
   newProps["img"] = "0";
-  newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#if (CALLPATH_ENABLED==1)
+    newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#else
+    newProps["callPath"] = "";
+#endif
   p.add("link", newProps);
   
   dbg->tag(p);
@@ -1632,7 +1642,11 @@ void anchor::linkImg(string text) const {
   newProps["anchorID"] = txt()<<anchorID;
   newProps["text"] = text;
   newProps["img"] = "1";
+#if (CALLPATH_ENABLED==1)
   newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#else
+    newProps["callPath"] = "";
+#endif
   p.add("link", newProps);
   
   dbg->tag(p);
@@ -1898,7 +1912,11 @@ properties* block::setProperties(string label, properties* props) {
     map<string, string> newProps;
     newProps["label"] = label;
 //cout << pthread_self()<<": CPRuntime="<<CPRuntime.get()<<endl;
-    newProps["callPath"] = "";//cp2str(CPRuntime->doStackwalk());
+#if (CALLPATH_ENABLED==1)
+    newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#else
+    newProps["callPath"] = "";
+#endif
     newProps["ID"] = txt()<<(maxBlockID+1);
     newProps["anchorID"] = txt()<<startA.getID();
     newProps["numAnchors"] = "0";
@@ -1940,7 +1958,11 @@ properties* block::setProperties(string label, anchor& pointsTo, properties* pro
     
     map<string, string> newProps;
     newProps["label"] = label;
+#if (CALLPATH_ENABLED==1)
     newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#else
+    newProps["callPath"] = "";
+#endif
     newProps["ID"] = txt()<<(maxBlockID+1);
     newProps["anchorID"] = txt()<<startA.getID();
     if(pointsTo != anchor::noAnchor) {
@@ -1992,7 +2014,11 @@ properties* block::setProperties(string label, set<anchor>& pointsTo, properties
     
     map<string, string> newProps;
     newProps["label"] = label;
+#if (CALLPATH_ENABLED==1)
     newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#else
+    newProps["callPath"] = "";
+#endif
     newProps["ID"] = txt()<<(maxBlockID+1);
     newProps["anchorID"] = txt()<<startA.getID();
     
@@ -2490,7 +2516,11 @@ string dbgStream::addImage(string ext)
   properties p;
   map<string, string> newProps;
   newProps["path"] = imgFName.str();
-  newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#if (CALLPATH_ENABLED==1)
+    newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#else
+    newProps["callPath"] = "";
+#endif
   p.add("image", newProps);
   
   tag(p);
@@ -2803,7 +2833,11 @@ properties* indent::setProperties(std::string prefix, int repeatCnt, const attrO
     map<string, string> newProps;
     newProps["prefix"] = prefix;
     newProps["repeatCnt"] = txt()<<repeatCnt;
-    //newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#if (CALLPATH_ENABLED==1)
+    newProps["callPath"] = cp2str(CPRuntime->doStackwalk());
+#else
+    newProps["callPath"] = "";
+#endif
     props->add("indent", newProps);
   } else
     props->active = false;
@@ -3136,7 +3170,10 @@ void AbortHandlerInstantiator::init() {
   struct sigaction new_action;
      
   // Register AbortHandlerInstantiator::appExited to be called when the application calls exit
-  atexit(AbortHandlerInstantiator::appExited);
+  // GB: Not here. This code is called before the start of main(), meaning that
+  //     many global vars will be initialized after this point and will be
+  //     destroyed before appExited() is actually invoked.
+  //atexit(AbortHandlerInstantiator::appExited);
   
   // Register AbortHandlerInstantiator::killSignal() to be called when the application receives a kill signal
   new_action.sa_handler = AbortHandlerInstantiator::killSignal;

@@ -12,7 +12,9 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
+#if (CALLPATH_ENABLED==1)
 #include "CallpathRuntime.h"
+#endif
 
 using namespace std;
 
@@ -69,7 +71,9 @@ properties* graph::setProperties(int graphID, std::string dotText, const attrOp*
     map<string, string> pMap;
     pMap["graphID"] = txt()<<maxGraphID;
     if(dotText != "") pMap["dotText"] = dotText;
-    //pMap["callPath"] = cp2str(CPRuntime.doStackwalk());
+#if (CALLPATH_ENABLED==1)
+    pMap["callPath"] = cp2str(CPRuntime.doStackwalk());
+#endif
     props->add("graph", pMap);
   }
   else
@@ -265,7 +269,9 @@ void graph::emitNodeTag(int anchorID, std::string label, int nodeID) {
   pMap["anchorID"] = txt()<<anchorID;
   pMap["label"]    = label;
   pMap["graphID"]  = txt()<<graphID;
-  //pMap["callPath"] = cp2str(CPRuntime.doStackwalk());
+#if (CALLPATH_ENABLED==1)
+  pMap["callPath"] = cp2str(CPRuntime.doStackwalk());
+#endif
   p.add("node", pMap);
   
   // This node has now been emitted
@@ -687,9 +693,11 @@ NodeMerger::NodeMerger(std::vector<std::pair<properties::tagType, properties::it
     
     pMap["label"] = getMergedValue(tags, "label");
     
-    /*vector<string> cpValues = getValues(tags, "callPath");
+#if (CALLPATH_ENABLED==1)
+    vector<string> cpValues = getValues(tags, "callPath");
     assert(allSame<string>(cpValues));
-    pMap["callPath"] = *cpValues.begin();*/
+    pMap["callPath"] = *cpValues.begin();
+#endif
   }
   
   props->add("node", pMap);

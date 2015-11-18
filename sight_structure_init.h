@@ -13,8 +13,10 @@
 #include <assert.h>
 #include "sight_common.h"
 #include "utils.h"
+#if (CALLPATH_ENABLED==1)
 #include "tools/callpath/include/Callpath.h"
 #include "tools/callpath/include/CallpathRuntime.h"
+#endif
 #include "thread_local_storage.h"
 #include <signal.h>
 

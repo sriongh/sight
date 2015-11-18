@@ -1,4 +1,4 @@
-all: dtl callpath
+all: dtl callpath boost_1_55_0
 
 dtl-1.17.tar.gz:
 	wget --no-check-certificate https://dtl-cpp.googlecode.com/files/dtl-1.17.tar.gz
@@ -56,6 +56,7 @@ callpath.tar.gz:
 	wget http://greg.bronevetsky.com/data/callpath.tar.gz
 	tar -xf callpath.tar.gz
 	
+ifeq (${CALLPATH_ENABLED}, 1)
 callpath: adept-utils # callpath.tar.gz
 	rm -rf callpath-master callpath
 	../getGithub https://github.com/tgamblin/callpath/archive/master.zip zip unzip master
@@ -69,7 +70,9 @@ callpath: adept-utils # callpath.tar.gz
 	                       -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CCC} \
 	                       -Dadept_utils_DIR=${ROOT_PATH}/tools/adept-utils/share/cmake/adept_utils ..
 	cd callpath/src; make; make install
-
+else
+callpath:
+endif
 #-DCALLPATH_HAVE_MPI=false 
 
 clean:

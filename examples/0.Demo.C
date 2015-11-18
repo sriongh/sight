@@ -32,7 +32,7 @@ int main(int argc, char** argv)
   
   SightInit(argc, argv, "Demo", txt()<<"dbg.0.Demo.maxDepth_"<<maxDepth);
   
-  dbg << "<h1>Demonstration of Sight</h1>" << endl;
+ /* dbg << "<h1>Demonstration of Sight</h1>" << endl;
   
   { 
     scope s("No formatting", scope::high);
@@ -148,9 +148,9 @@ int main(int argc, char** argv)
     }
 #pragma sightLoc PerfAnalysisEnd
   }
-
+*/
   {
-    scope s("Modular Analysis", scope::high);
+//    scope s("Modular Analysis", scope::high);
     { sight::structure::source src("source", source::regions(source::reg(thisFile, "ModularStart",    "ModularEnd"),
                                            source::reg(thisFile, "modularFibStart", "modularFibEnd"))); }
     

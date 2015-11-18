@@ -597,8 +597,10 @@ properties* modularApp::setProperties(const std::string& appName, const attrOp* 
     	props->active = true;
       
       if(props->emitTag) {
-        /*map<string, string> pMap = c->first.getProperties();
-        //newProps["callPath"] = cp2str(CPRuntime.doStackwalk());*/
+        //map<string, string> pMap = c->first.getProperties();
+#if (CALLPATH_ENABLED==1)
+        newProps["callPath"] = cp2str(CPRuntime.doStackwalk());
+#endif
         map<string, string> pMap;
         pMap["appName"] = appName;
         pMap["appID"]   = txt()<<maxModularAppID;
@@ -716,12 +718,6 @@ void modularApp::addEdge(port from, port to) {
     edges[edge] = 1;
   else
     edges[edge]++;
-  
-  /*cout << "    module::addEdge()"<<endl;
-  cout << "      edge="<<from.str()<<" => "<<to.str()<<endl;
-  for(map<pair<port, port>, int>::iterator e=edges->begin(); e!=edges->end(); e++) {
-    cout << "        "<<e->first.first.str()<<" => "<<e->first.second.str()<<" : "<<e->second<<endl;
-  }*/
 }
 
 // Add an edge between one module's output port and another module's input port
@@ -2178,9 +2174,11 @@ properties* ModularAppMerger::setProperties(std::vector<std::pair<properties::ta
     int appID = streamRecord::mergeIDs("modularApp", "appID", pMap, tags, outStreamRecords, inStreamRecords);
     pMap["appID"] = txt() << appID;
     
-    /*vector<string> cpValues = getValues(tags, "callPath");
+#if (CALLPATH_ENABLED==1)
+    vector<string> cpValues = getValues(tags, "callPath");
     assert(allSame<string>(cpValues));
-    pMap["callPath"] = *cpValues.begin();*/
+    pMap["callPath"] = *cpValues.begin();
+#endif
     
     //ModuleStreamRecord::enterModularApp(outStreamRecords, inStreamRecords);
     props->add("modularApp", pMap);
@@ -2342,9 +2340,11 @@ properties* ModuleMerger::setProperties(std::vector<std::pair<properties::tagTyp
     vector<string> names = getNames(tags); assert(allSame<string>(names));
     assert(*names.begin() == "moduleMarker" || *names.begin() == "module");
     
-    /*vector<string> cpValues = getValues(tags, "callPath");
+#if (CALLPATH_ENABLED==1)
+    vector<string> cpValues = getValues(tags, "callPath");
     assert(allSame<string>(cpValues));
-    pMap["callPath"] = *cpValues.begin();*/
+    pMap["callPath"] = *cpValues.begin();
+#endif
     
     // Merge the module IDs along all the streams
     //int nodeID = ModuleStreamRecord::mergeNodeIDs("moduleID", pMap, tags, outStreamRecords, inStreamRecords);
@@ -2574,9 +2574,11 @@ properties* ModuleEdgeMerger::setProperties(std::vector<std::pair<properties::ta
     vector<string> names = getNames(tags); assert(allSame<string>(names));
     assert(*names.begin() == "moduleEdge");
 
-    /*vector<string> cpValues = getValues(tags, "callPath");
+#if (CALLPATH_ENABLED==1)
+    vector<string> cpValues = getValues(tags, "callPath");
     assert(allSame<string>(cpValues));
-    pMap["callPath"] = *cpValues.begin();*/
+    pMap["callPath"] = *cpValues.begin();
+#endif
 
     //ModuleStreamRecord msr = ((ModuleStreamRecord*)outStreamRecords["module"]);
     ModuleStreamRecord* msr = ModularAppMerger::getMSR();
@@ -2892,9 +2894,11 @@ properties* CompModuleMerger::setProperties(std::vector<std::pair<properties::ta
     vector<string> names = getNames(tags); assert(allSame<string>(names));
     assert(*names.begin() == "compModule");
     
-    /*vector<string> cpValues = getValues(tags, "callPath");
+#if (CALLPATH_ENABLED==1)
+    vector<string> cpValues = getValues(tags, "callPath");
     assert(allSame<string>(cpValues));
-    pMap["callPath"] = *cpValues.begin();*/
+    pMap["callPath"] = *cpValues.begin();
+#endif
     
     // Merge the module IDs along all the streams
     //int nodeID = ModuleStreamRecord::mergeNodeIDs("moduleID", pMap, tags, outStreamRecords, inStreamRecords);
