@@ -164,8 +164,10 @@ endif
 slayout.o: slayout.C process.C process.h
 	${CCC} ${SIGHT_CFLAGS} slayout.C -I. -c -o slayout.o
 
-slayout${EXE}: libsight_layout.so widgets_post #mfem
-	${CCC} -Wl,-rpath ${ROOT_PATH} -Wl,--whole-archive libsight_layout.so apps/mfem/mfem_layout.o -Wl,-no-whole-archive -o slayout${EXE}
+slayout${EXE}: libsight_layout.so widgets_post
+	${CCC} -Wl,-rpath ${ROOT_PATH} -Wl,--whole-archive libsight_layout.so -Wl,-no-whole-archive -o slayout${EXE}
+#slayout${EXE}: libsight_layout.so widgets_post mfem
+#	${CCC} -Wl,-rpath ${ROOT_PATH} -Wl,--whole-archive libsight_layout.so apps/mfem/mfem_layout.o -Wl,-no-whole-archive -o slayout${EXE}
 #slayout${EXE}: mfem libsight_layout.so
 #	${CCC} libsight_layout.so -Wl,-rpath ${ROOT_PATH} -Wl,-rpath ${ROOT_PATH}/widgets/gsl/lib -Lwidgets/gsl/lib -lgsl -lgslcblas apps/mfem/mfem_layout.o -o slayout${EXE}
 #slayout${EXE}: mfem libsight_layout.a
