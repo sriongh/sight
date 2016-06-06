@@ -569,8 +569,10 @@ void anchor::reachedLocation() {
   //cout << "    reachedLocation() located="<<located<<", anchorID="<<anchorID<<" dbg.getLocation()="<<dbg.blockGlobalStr(dbg.getLocation())<<"<BR>"<<endl;
   // If this anchor has already been set to point to its target location, emit a warning
   if(located && loc != dbg.getLocation()) {
+#ifdef VERBOSE
     dbg << "Warning: anchor "<<anchorID<<" is being set to multiple target locations! current location="<<dbg.blockGlobalStr(loc)<<", new location="<<dbg.blockGlobalStr(dbg.getLocation())<< endl;
     cerr << "Warning: anchor "<<anchorID<<" is being set to multiple target locations! current location="<<dbg.blockGlobalStr(loc)<<", new location="<<dbg.blockGlobalStr(dbg.getLocation())<< endl;
+#endif
   } else {
     located = true; // We've now reached this anchor's location in the output
     loc     = dbg.getLocation();

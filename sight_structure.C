@@ -1531,12 +1531,19 @@ void anchor::reachedLocation() {
   //dbg << "located="<<located<<endl;
   // If this anchor has already been set to point to its target location, emit a warning
   if(located && loc != dbg->getLocation()) {
+#ifdef VERBOSE
     cerr << "Warning: anchor "<<anchorID<<" is being set to multiple target locations! current location="<<loc.str()<<", new location="<<dbg->getLocation().str()<< endl;
     cerr << "noAnchor="<<noAnchor.str()<<endl;
+#endif
     if(anchorLocs.find(anchorID) != anchorLocs.end())
+#ifdef VERBOSE
       cerr << "anchorLocs[anchorID]="<<anchorLocs[anchorID].str()<<endl;
-    for(map<int, location>::iterator i=anchorLocs.begin(); i!=anchorLocs.end(); i++)
+#endif
+    for(map<int, location>::iterator i=anchorLocs.begin(); i!=anchorLocs.end(); i++) {
+#ifdef VERBOSE
       cerr << "    "<<i->first<<" => "<<i->second.str()<<endl;
+#endif
+    }
   } else {
     located = true;
     loc = dbg->getLocation();
@@ -1793,8 +1800,11 @@ streamAnchor::~streamAnchor() {
 // Records that this anchor's location is the current spot in the output
 void streamAnchor::reachedLocation() {
   // If this anchor has already been set to point to its target location, emit a warning
-  if(located && loc != dbgStreamR->getLocation())
+  if(located && loc != dbgStreamR->getLocation()) {
+#ifdef VERBOSE
     cerr << "Warning: anchor "<<ID.str()<<" is being set to multiple target locations! current location="<<loc.str()<<", new location="<<dbgStreamR->getLocation().str()<< endl;
+#endif
+  }
   else {
     located = true;
     loc = dbgStreamR->getLocation();

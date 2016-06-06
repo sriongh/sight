@@ -53,7 +53,7 @@ endif
 
 all: core allExamples
 	
-core: sightDefines.pl gdbLineNum.pl Makefile.extern definitions.h maketools libsight_common.a libsight_structure.so slayout${EXE} libsight_layout.so hier_merge${EXE} widgets_post script/taffydb 
+core: sightDefines.pl gdbLineNum.pl definitions.h maketools libsight_common.a libsight_structure.so slayout${EXE} libsight_layout.so hier_merge${EXE} widgets_post script/taffydb 
 	chmod 755 html img script
 	chmod 644 html/* img/* script/*
 	chmod 755 script/taffydb
