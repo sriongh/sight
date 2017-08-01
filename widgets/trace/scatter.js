@@ -1,5 +1,3 @@
-//var data = [[5,3], [10,17], [15,4], [2,8]];
-
 // Adapted from http://bl.ocks.org/bunkat/2595950   
 
 function createNumericScale_2DScatter(data, idx, minVisCoord, maxVisCoord, axisType) {
