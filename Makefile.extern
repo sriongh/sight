@@ -1,4 +1,4 @@
-ROOT_PATH = /uufs/chpc.utah.edu/common/home/u0608406/local/sight.new
+ROOT_PATH = /lustre/home/saananth/local/sight
 SIGHT_CFLAGS = -I${ROOT_PATH} -I${ROOT_PATH}/widgets -I${ROOT_PATH}/widgets/parallel \
                -I${ROOT_PATH}/tools/callpath/src -I${ROOT_PATH}/tools/adept-utils/include -I${ROOT_PATH}/tools/boost_1_55_0 \
                -I${ROOT_PATH}/widgets/papi/include\

@@ -122,7 +122,7 @@ endif
 ifneq (${OS}, Cygwin)
 shellinabox/bin/shellinaboxd${EXE}:
 	rm -f shellinabox-2.14.tar.gz
-	cd widgets; wget --no-check-certificate https://shellinabox.googlecode.com/files/shellinabox-2.14.tar.gz
+	cd widgets; wget --no-check-certificate https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/shellinabox/shellinabox-2.14.tar.gz
 	cd widgets; tar -xf shellinabox-2.14.tar.gz
 	cd shellinabox-2.14; ./configure --prefix=${ROOT_PATH}/widgets/shellinabox
 	cd shellinabox-2.14; ${MAKE}
@@ -142,7 +142,7 @@ endif
 
 mongoose/mongoose${EXE}:
 	rm -f mongoose-3.8.tgz
-	wget --no-check-certificate https://mongoose.googlecode.com/files/mongoose-3.8.tgz
+	wget --no-check-certificate https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/mongoose/mongoose-3.8.tgz
 	tar -xf mongoose-3.8.tgz
 	rm mongoose-3.8.tgz
 	cd mongoose; ${MAKE} ${OS_MONGOOSE}
@@ -227,11 +227,10 @@ libmsr/lib/libmsr.so:
 	cd libmsr/src; make CC=${CC}
 
 synoptic:
-	wget http://synoptic.googlecode.com/files/synoptic-0.1.tar.gz
-	tar -xf synoptic-0.1.tar.gz
-	mv synoptic-0.1 synoptic
-	rm synoptic-0.1.tar.gz
-
+	git clone https://github.com/ModelInference/synoptic/
+	cd synoptic
+	ant synoptic
+	
 # JavaScript files from standard JS libraries that we wish to keep local copies of
 
 external_scripts: yui-min.js jquery-1.9.1.min.js underscore-min.js d3.v3.min.js jquery-ui.js jquery-ui.css
