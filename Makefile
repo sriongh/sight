@@ -35,7 +35,7 @@ ROOT_PATH = ${CURDIR}
 # Set whether we'll use callpaths to help align different blocks more accurately during merging.
 CALLPATH_ENABLED=0
 
-SIGHT_CFLAGS = -g -fPIC -I${ROOT_PATH} -I${ROOT_PATH}/widgets -I${ROOT_PATH}/attributes -I${ROOT_PATH}/widgets/parallel \
+SIGHT_CFLAGS = -g  -std=c++03 -fPIC -I${ROOT_PATH} -I${ROOT_PATH}/widgets -I${ROOT_PATH}/attributes -I${ROOT_PATH}/widgets/parallel \
                 -I${ROOT_PATH}/tools/callpath/src -I${ROOT_PATH}/tools/adept-utils/include \
                 -I${ROOT_PATH}/tools/boost_1_55_0 \
                 -I${ROOT_PATH}/widgets/papi/include \
