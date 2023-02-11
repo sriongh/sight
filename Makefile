@@ -290,7 +290,7 @@ definitions.h: initDefinitionsH Makefile
 	chmod 755 initDefinitionsH
 	./initDefinitionsH ${RAPL_ENABLED}
 
-clean: clean_objects
+clean:
 	cd widgets; make -f Makefile_pre clean
 	cd widgets; make -f Makefile_post clean
 	cd tools; make -f Makefile clean
@@ -301,12 +301,9 @@ clean: clean_objects
 	rm -rf dbg dbg.* *.a *.o widgets/shellinabox* widgets/mongoose* widgets/graphviz gdbLineNum.pl
 	rm -rf script/taffydb sightDefines.pl gdbscript
 	rm -f slayout hier_merge
-	rm -f ${SIGHT_COMMON_O}
-	rm -f ${SIGHT_STRUCTURE_O}
-	rm -f ${SIGHT_LAYOUT_O}
 
 clean_objects:
-	rm -f Makefile.extern definitions.h *.a *.o attributes/*.o widgets/*.o widgets/*/*.o hier_merge slayout libsight_layout.so libsight_structure.so
+	rm -f Makefile.extern definitions.h *.a *.o attributes/*.o widgets/*.o widgets/*/*.o hier_merge slayout
 
 script/taffydb:
 	#cd script; wget --no-check-certificate https://github.com/typicaljoe/taffydb/archive/master.zip
