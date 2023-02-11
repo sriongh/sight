@@ -35,7 +35,7 @@ ROOT_PATH = ${CURDIR}
 # Set whether we'll use callpaths to help align different blocks more accurately during merging.
 CALLPATH_ENABLED=0
 
-SIGHT_CFLAGS = -g  -std=c++03 -fPIC -I${ROOT_PATH} -I${ROOT_PATH}/widgets -I${ROOT_PATH}/attributes -I${ROOT_PATH}/widgets/parallel \
+SIGHT_CFLAGS = -g -fPIC -I${ROOT_PATH} -I${ROOT_PATH}/widgets -I${ROOT_PATH}/attributes -I${ROOT_PATH}/widgets/parallel \
                 -I${ROOT_PATH}/tools/callpath/src -I${ROOT_PATH}/tools/adept-utils/include \
                 -I${ROOT_PATH}/tools/boost_1_55_0 \
                 -I${ROOT_PATH}/widgets/papi/include \
@@ -290,7 +290,7 @@ definitions.h: initDefinitionsH Makefile
 	chmod 755 initDefinitionsH
 	./initDefinitionsH ${RAPL_ENABLED}
 
-clean:
+clean: clean_objects
 	cd widgets; make -f Makefile_pre clean
 	cd widgets; make -f Makefile_post clean
 	cd tools; make -f Makefile clean
@@ -301,9 +301,12 @@ clean:
 	rm -rf dbg dbg.* *.a *.o widgets/shellinabox* widgets/mongoose* widgets/graphviz gdbLineNum.pl
 	rm -rf script/taffydb sightDefines.pl gdbscript
 	rm -f slayout hier_merge
+	rm -f ${SIGHT_COMMON_O}
+	rm -f ${SIGHT_STRUCTURE_O}
+	rm -f ${SIGHT_LAYOUT_O}
 
 clean_objects:
-	rm -f Makefile.extern definitions.h *.a *.o attributes/*.o widgets/*.o widgets/*/*.o hier_merge slayout
+	rm -f Makefile.extern definitions.h *.a *.o attributes/*.o widgets/*.o widgets/*/*.o hier_merge slayout libsight_layout.so libsight_structure.so
 
 script/taffydb:
 	#cd script; wget --no-check-certificate https://github.com/typicaljoe/taffydb/archive/master.zip

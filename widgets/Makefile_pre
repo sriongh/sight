@@ -334,3 +334,8 @@ clean:
 	rm -f yui-min.js jquery-1.8.1.min.js underscore-min.js d3.v3.min.js d3.v3.js
 	rm -f jquery-1.9.1.min.js jquery-ui.css jquery-ui.js
 	rm -f Three.js Detector.js OrbitControls.js THREEx.WindowResize.js Stats.js
+	rm -f */*.o
+	rm -rf THREE
+	rm -rf expat
+	rm -rf jsPlumb
+	rm -f r71.zip
