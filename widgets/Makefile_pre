@@ -35,7 +35,7 @@ MAKE_DEFINES = ROOT_PATH=${ROOT_PATH} RAPL_ENABLED=${RAPL_ENABLED} REMOTE_ENABLE
 all: gsl papi libmsr \
      ${WIDGETS_COMMON_O} ${WIDGETS_COMMON_H} ${WIDGETS_STRUCTURE_O} ${WIDGETS_STRUCTURE_H} ${WIDGETS_LAYOUT_O} ${WIDGETS_LAYOUT_H}  \
      box \
-     shellinabox/bin/shellinaboxd${EXE} mongoose/mongoose${EXE} graphviz/bin/dot${EXE} \
+     mongoose/mongoose${EXE} graphviz/bin/dot${EXE} \
      vnc \
      source/sh_main.js source/sh_cpp.js \
      threejs \
@@ -226,7 +226,7 @@ noVNC:
 #	cd funcFit; ${MAKE} ROOT_PATH=${ROOT_PATH} REMOTE_ENABLED=${REMOTE_ENABLED} GDB_PORT=${GDB_PORT} OS=${OS} SIGHT_CFLAGS="${SIGHT_CFLAGS}" SIGHT_LINKFLAGS="${SIGHT_LINKFLAGS}" CC=${CC} CCC=${CCC} GSL_PATH=${ROOT_PATH}/widgets/gsl
 
 gsl:
-	wget ftp://ftp.gnu.org/gnu/gsl/gsl-1.9.tar.gz
+	wget https://ftp.gnu.org/gnu/gsl/gsl-1.9.tar.gz
 	tar -xf gsl-1.9.tar.gz 
 	cd gsl-1.9; CC=${CC}; ./configure --prefix=${ROOT_PATH}/widgets/gsl
 	cd gsl-1.9; make; make install
