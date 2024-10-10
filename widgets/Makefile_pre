@@ -322,8 +322,8 @@ Stats.js:
 jsPlumb:
 #	../getGithub https://github.com/sporritt/jsPlumb/archive/master.zip zip unzip
 #	mv jsPlumb-master jsPlumb
-	../getGithub https://github.com/sporritt/jsPlumb/archive/dev/1.6.2.zip zip unzip 1.6.2
-	mv jsplumb-dev-1.6.2 jsPlumb
+	../getGithub https://github.com/jsplumb/community-edition/archive/refs/tags/1.6.2.zip zip unzip 1.6.2
+	mv community-edition-1.6.2 jsPlumb
 
 clean:
 	rm -fr xdotool
